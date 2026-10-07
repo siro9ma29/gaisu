@@ -52,10 +52,11 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .tiles.pick .tile .n{border-color:var(--main);box-shadow:0 4px 0 var(--main-soft)}
 .tiles.pick .tile:active .n{transform:translateY(3px);box-shadow:none}
 .tile.target .n{border-radius:50%;border:5px solid var(--ng);background:#fff}
+.mark{height:clamp(30px,8vw,44px);font-size:clamp(22px,6.5vw,36px);line-height:1;font-weight:700;color:var(--ng);display:grid;place-items:center}
 .slot{height:clamp(40px,11vw,62px);font-size:clamp(30px,9vw,52px);font-weight:700;color:var(--ok);display:grid;place-items:center;font-variant-numeric:tabular-nums}
 .slot.zero{color:var(--main)}
 .slot.pop{animation:pop .35s}
-@keyframes pop{0%{transform:translateY(14px) scale(.4);opacity:0}100%{transform:none;opacity:1}}
+@keyframes pop{0%{transform:translateY(-14px) scale(.4);opacity:0}100%{transform:none;opacity:1}}
 .pad{display:grid;gap:8px;grid-template-columns:repeat(5,1fr)}
 .pad .btn{min-height:58px;font-size:26px;padding:0}
 .tile.shake .n{animation:shake .3s;border-color:var(--ng);background:var(--ng-soft)}
@@ -221,10 +222,13 @@ function renderTiles(){
   var q=st.q, s=String(q.n), h='';
   for(var i=0;i<s.length;i++){
     var e=s.length-1-i, slot='', sc='';
-    if(st.step>=4&&e<q.p){slot='0';sc=' zero'+(st.step===4?' pop':'')}
+    // 「ま」=もとめる位、「で」=その1つ下の位(四捨五入する位)
+    var mark=e===q.p?'ま':(e===q.r?'で':'');
+    // 0は、四捨五入する数をタップしたと同時に、数の下に出す
+    if(st.step>=2&&e<q.p){slot='0';sc=' zero'+(st.step===2?' pop':'')}
     else if(st.step===5&&e===q.p){slot=q.ad;sc=' pop'}
     else if(st.step===5&&e>q.p){slot=s[i]}
-    h+='<button class="tile'+(st.step>1&&e===q.r?' target':'')+'" data-e="'+e+'"><span class="slot'+sc+'">'+slot+'</span><small>'+PLACE[e]+'の位</small><span class="n">'+s[i]+'</span></button>';
+    h+='<button class="tile'+(st.step>1&&e===q.r?' target':'')+'" data-e="'+e+'"><span class="mark">'+mark+'</span><small>'+PLACE[e]+'の位</small><span class="n">'+s[i]+'</span><span class="slot'+sc+'">'+slot+'</span></button>';
   }
   var t=$('tiles'); t.innerHTML=h; t.classList.toggle('pick',st.step===1);
 }
@@ -232,19 +236,20 @@ function renderTiles(){
 function renderStep(){
   var q=st.q;
   [1,2,3,4].forEach(function(i){
-    var el=$('s'+i); el.classList.toggle('active',st.step===i); el.classList.toggle('done',st.step>i);
+    var el=$('s'+i); el.classList.toggle('active',st.step===i);
+    el.classList.toggle('done',st.step>i||(i===3&&st.step>=2)); // 0は手順1のタップと同時に書かれる
     if(st.step!==i) $('b'+i).innerHTML='';
   });
   if(st.step===1){
     $('b1').innerHTML='<p class="ask">上の数字の中から、<b>四捨五入する位の数字</b>をタップしよう。</p><div id="hint"></div>';
   }else if(st.step===2){
     $('r1').textContent=PLACE[q.r]+'の位の '+q.digit;
+    $('r3').textContent=PLACE[q.r]+'の位'+(q.r>0?'から下':'')+'は 0';
     $('b2').innerHTML='<p class="ask">'+PLACE[q.r]+'の位の数字は <b>'+q.digit+'</b>。0〜4かな、5〜9かな?</p>'+
       '<div class="btns"><button class="btn" data-up="0">切り捨て<small>0・1・2・3・4</small></button>'+
       '<button class="btn" data-up="1">切り上げ<small>5・6・7・8・9</small></button></div><div id="hint"></div>';
   }else if(st.step===4){
     $('r2').textContent=q.up?'5〜9。切り上げ。':'0〜4。切り捨て。';
-    $('r3').textContent=PLACE[q.r]+'の位'+(q.r>0?'から下':'')+'は 0';
     var pad='';for(var d=0;d<10;d++)pad+='<button class="btn" data-d="'+d+'">'+d+'</button>';
     $('b4').innerHTML='<p class="ask">'+(q.up?'切り上げ':'切り捨て')+'だから、<b>'+PLACE[q.p]+'の位</b>の数字はいくつになるかな?</p><div class="pad">'+pad+'</div><div id="hint"></div>';
   }
