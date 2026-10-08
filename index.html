@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>がい数れんしゅう</title>
+<title>がい数れんしゅう v2.3</title>
 <style>
 :root{
   --bg:#f6f1e7; --card:#fffdf8; --ink:#2b2a33; --sub:#6b6875; --line:#e2d9c8;
@@ -17,9 +17,18 @@ body{background:var(--bg);color:var(--ink);
   font-size:18px;line-height:1.6;-webkit-text-size-adjust:100%}
 .wrap{max-width:720px;margin:0 auto;padding:16px 16px 48px}
 h1{font-size:26px;margin:8px 0 4px}
-.lead{color:var(--sub);margin:0 0 20px}
+.ver{display:inline-block;font-size:13px;font-weight:700;background:var(--main-soft);color:var(--main);
+  border-radius:999px;padding:2px 10px;margin-left:8px;vertical-align:middle}
+.lead{color:var(--sub);margin:0 0 14px}
 button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .hidden{display:none!important}
+
+/* モードえらび */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.mode{min-height:56px;border-radius:14px;border:2px solid var(--line);background:var(--card);font-weight:700;padding:6px}
+.mode small{display:block;font-size:13px;font-weight:400;color:var(--sub)}
+.mode.on{background:var(--main);border-color:var(--main);color:#fff}
+.mode.on small{color:#d9edf3}
 
 /* レベルえらび */
 .levels{display:grid;gap:12px}
@@ -30,12 +39,28 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .level span.d{color:var(--sub);font-size:16px}
 .badge{flex:none;width:52px;height:52px;border-radius:50%;background:var(--main);color:#fff;
   display:grid;place-items:center;font-size:24px;font-weight:700}
+.levels.ta .badge{background:var(--ng)}
 .howto{margin-top:24px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 18px}
 .howto ol{margin:6px 0 0;padding-left:1.4em}
 
+/* タイムアタック */
+.ready{text-align:center;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:24px 16px}
+.ready h2{margin:0 0 4px;font-size:24px}
+.ready ul{display:inline-block;text-align:left;margin:12px 0 0;padding-left:1.3em}
+.timer{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.timer .sec{flex:none;min-width:92px;font-weight:700;color:var(--main);white-space:nowrap}
+.timer .sec b{font-size:30px;font-variant-numeric:tabular-nums}
+.timer .bar{flex:1;height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.timer .bar i{display:block;height:100%;width:100%;background:var(--main);border-radius:7px}
+.timer.warn .sec{color:var(--ng)} .timer.warn .bar i{background:var(--ng)}
+
+.count{text-align:center;font-size:140px;font-weight:700;color:var(--main);line-height:1;padding:80px 0 20px;font-variant-numeric:tabular-nums}
+.count.pop{animation:pop .35s}
+.countmsg{text-align:center;color:var(--sub);font-size:20px;margin:0}
+
 /* 問題画面 */
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
-.back{background:none;border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-size:15px;background:var(--card)}
+.back{border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-size:15px;background:var(--card)}
 .prog{font-size:15px;color:var(--sub)}
 .dots{display:flex;gap:5px;margin-bottom:14px}
 .dots i{flex:1;height:8px;border-radius:4px;background:var(--line)}
@@ -55,15 +80,12 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .mark{height:clamp(30px,8vw,44px);font-size:clamp(22px,6.5vw,36px);line-height:1;font-weight:700;color:var(--ng);display:grid;place-items:center}
 .slot{height:clamp(40px,11vw,62px);font-size:clamp(30px,9vw,52px);font-weight:700;color:var(--ok);display:grid;place-items:center;font-variant-numeric:tabular-nums}
 .slot.zero{color:var(--main)}
+.slot.frame{width:clamp(42px,13vw,74px);border:4px solid var(--ng);border-radius:10px;background:#fff;animation:pop .35s}
 .slot.pop{animation:pop .35s}
 @keyframes pop{0%{transform:translateY(-14px) scale(.4);opacity:0}100%{transform:none;opacity:1}}
-.pad{display:grid;gap:8px;grid-template-columns:repeat(5,1fr)}
-.pad .btn{min-height:58px;font-size:26px;padding:0}
+.btn.two{min-height:72px;font-size:34px;font-variant-numeric:tabular-nums}
 .tile.shake .n{animation:shake .3s;border-color:var(--ng);background:var(--ng-soft)}
-.tile.zero .n{color:var(--sub);background:#f1ece2}
-.tile.up .n{background:var(--ok-soft);border-color:var(--ok)}
 @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.arrow{font-size:24px;color:var(--sub);margin:6px 0 2px}
 
 .steps{display:grid;gap:10px;margin-top:14px}
 .step{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 14px;opacity:.55}
@@ -85,7 +107,6 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .btn:active{transform:translateY(3px);box-shadow:none}
 .btn small{display:block;font-size:14px;font-weight:400;color:var(--sub)}
 .btn.wrong{border-color:var(--ng);background:var(--ng-soft);color:var(--ng);box-shadow:none;animation:shake .3s}
-.btn.num4{font-size:24px;font-variant-numeric:tabular-nums}
 .hint{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--ng-soft);color:#7d2f1f;font-size:16px}
 .good{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--ok-soft);color:#1d5c39}
 .next{display:block;width:100%;margin-top:14px;min-height:62px;border:0;border-radius:16px;background:var(--main);
@@ -94,8 +115,10 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 
 /* けっか */
 .result{text-align:center;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:28px 16px}
-.result .big{font-size:56px;font-weight:700;color:var(--main);line-height:1.2}
+.result .big{font-size:56px;font-weight:700;color:var(--main);line-height:1.2;margin:8px 0}
 .result .big small{font-size:22px;color:var(--sub)}
+.result .ans{margin:14px 0 0;padding:10px 12px;border-radius:12px;background:var(--ng-soft);color:#7d2f1f;font-size:17px}
+.result .best{margin:12px 0 0;font-weight:700;color:var(--ok)}
 .second{display:block;width:100%;margin-top:10px;min-height:56px;border:2px solid var(--line);border-radius:16px;background:var(--card);font-size:18px}
 </style>
 </head>
@@ -104,12 +127,17 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 
   <!-- レベルえらび -->
   <section id="home">
-    <h1>がい数れんしゅう</h1>
-    <p class="lead">四捨五入で、がい数にしよう。レベルをえらんでね。</p>
-    <div class="levels">
+    <h1>がい数れんしゅう<span class="ver" id="ver"></span></h1>
+    <p class="lead" id="lead"></p>
+    <div class="modes">
+      <button class="mode on" data-mode="basic">きほんモード<small>じっくり10問</small></button>
+      <button class="mode" data-mode="ta">タイムアタック<small>60秒で何問?</small></button>
+    </div>
+    <div class="levels" id="levels">
       <button class="level" data-level="1"><span class="badge">1</span><span><b>千の位までのがい数</b><span class="d">4けたの数を、千の位までのがい数にする</span></span></button>
       <button class="level" data-level="2"><span class="badge">2</span><span><b>いろいろな位までのがい数</b><span class="d">百の位まで・千の位まで・一万の位まで</span></span></button>
       <button class="level" data-level="3"><span class="badge">3</span><span><b>上から○けたのがい数</b><span class="d">上から1けた・上から2けたのがい数にする</span></span></button>
+      <button class="level" data-level="4"><span class="badge">4</span><span><b>ミックス</b><span class="d">レベル1〜3の問題が、まざって出る</span></span></button>
     </div>
     <div class="howto">
       <b>がい数のもとめ方</b>
@@ -122,6 +150,27 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
     </div>
   </section>
 
+  <!-- タイムアタックのじゅんび -->
+  <section id="ready" class="hidden">
+    <div class="top"><button class="back" id="backBtn2">← レベルをえらぶ</button></div>
+    <div class="ready">
+      <h2>タイムアタック</h2>
+      <p style="margin:0;color:var(--sub)" id="readyLv"></p>
+      <ul>
+        <li>60秒で何問とけるかチャレンジ!</li>
+        <li>1回でもまちがえたら、そこでおわり</li>
+      </ul>
+      <p class="best" id="readyBest" style="margin:12px 0 0;font-weight:700;color:var(--ok)"></p>
+    </div>
+    <button class="next" id="goBtn">スタート!</button>
+  </section>
+
+  <!-- タイムアタックのカウントダウン -->
+  <section id="count" class="hidden">
+    <p class="count" id="countNum">3</p>
+    <p class="countmsg">よーい…</p>
+  </section>
+
   <!-- 問題 -->
   <section id="play" class="hidden">
     <div class="top">
@@ -129,6 +178,10 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
       <span class="prog" id="prog"></span>
     </div>
     <div class="dots" id="dots"></div>
+    <div class="timer hidden" id="timer">
+      <span class="sec">のこり <b id="tsec">60</b> 秒</span>
+      <span class="bar"><i id="tbar"></i></span>
+    </div>
 
     <div class="qbox">
       <p class="qtext" id="qtext"></p>
@@ -136,6 +189,10 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
     </div>
 
     <div class="steps">
+      <div class="step hidden" id="s0">
+        <div class="shead"><span class="num">★</span><span class="stitle">「ま」「で」をつける</span><span class="sres" id="r0"></span></div>
+        <div class="sbody" id="b0"></div>
+      </div>
       <div class="step" id="s1">
         <div class="shead"><span class="num">01</span><span class="stitle">四捨五入する位を見つける</span><span class="sres" id="r1"></span></div>
         <div class="sbody" id="b1"></div>
@@ -160,8 +217,10 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
   <section id="done" class="hidden">
     <div class="result">
       <p id="doneMsg" style="font-size:22px;font-weight:700;margin:0"></p>
-      <p class="big"><span id="doneScore"></span><small> / 10問</small></p>
-      <p style="color:var(--sub);margin:0">1回で正かいできた問題の数</p>
+      <p class="big"><span id="doneScore"></span><small id="doneUnit"></small></p>
+      <p style="color:var(--sub);margin:0" id="doneNote"></p>
+      <p class="ans hidden" id="doneAns"></p>
+      <p class="best hidden" id="doneBest"></p>
     </div>
     <button class="next" id="againBtn">同じレベルでもう一度</button>
     <button class="second" id="homeBtn">レベルをえらぶ</button>
@@ -171,21 +230,26 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
+var VERSION='v2.3';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
+var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス'};
 var TOTAL=10;
-// はじめに出す決まった問題(レベル1はスライドの例題)
+var SELF=4;          // きほんモードで、さいごの何問を「ま」「で」も自分でつける問題にするか
+// きほんモードで、はじめに出す決まった問題(レベル1はスライドの例題)
 var FIXED={
   1:[{n:1380,p:3},{n:1640,p:3}],
   2:[{n:2470,p:2},{n:38500,p:3}],
-  3:[{n:4360,k:1},{n:7281,k:2}]
+  3:[{n:4360,k:1},{n:7281,k:2}],
+  4:[]
 };
-var st={level:1,idx:0,score:0,log:[],q:null,step:1,missed:false};
+var st={mode:'basic',level:1,idx:0,score:0,log:[],q:null,step:1,missed:false,run:false,end:0,tick:null,adv:null};
 var $=function(id){return document.getElementById(id)};
 function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1))}
-function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(0,i),t=a[i];a[i]=a[j];a[j]=t}return a}
 function pow(e){return Math.pow(10,e)}
 
 function makeQ(level,idx){
+  if(level===4) return makeQ(rnd(1,3),99); // レベル4は、レベル1〜3からランダム
   var f=FIXED[level][idx], n, p, k=0, d;
   if(f){ n=f.n; if(f.k){k=f.k;p=String(n).length-k}else p=f.p; }
   else if(level===1){ p=3; do{n=rnd(1000,9999)}while(n%1000===0); }
@@ -197,24 +261,89 @@ function makeQ(level,idx){
     do{n=rnd(pow(d-1),pow(d)-1)}while(n%pow(p)===0);
   }
   var r=p-1, digit=Math.floor(n/pow(r))%10, pd=Math.floor(n/pow(p))%10, up=digit>=5;
-  if(up&&pd===9) return makeQ(level,99); // くり上がりで けた数がふえる問題は出さない
+  if(pd===9) return makeQ(level,99); // もとめる位が9の問題は出さない(2たくが 9と10 になってしまうため)
   var base=Math.floor(n/pow(p))*pow(p);
   return {n:n,p:p,r:r,k:k,digit:digit,pd:pd,up:up,ad:up?pd+1:pd,ans:up?base+pow(p):base};
 }
+function target(q){return q.k?'上から'+q.k+'けた':PLACE[q.p]+'の位まで'}
 
-function show(id){['home','play','done'].forEach(function(s){$(s).classList.toggle('hidden',s!==id)});window.scrollTo(0,0)}
+// --- じこベスト(タイムアタック)。保存できない端末でも動く ---
+function getBest(level){try{return +localStorage.getItem('gaisu_ta_best_'+level)||0}catch(e){return 0}}
+function setBest(level,v){try{localStorage.setItem('gaisu_ta_best_'+level,v)}catch(e){}}
 
-function start(level){st.level=level;st.idx=0;st.score=0;st.log=[];show('play');newQ()}
+function stopTA(){st.run=false;clearInterval(st.tick);clearTimeout(st.adv)}
+function show(id){
+  if(id!=='play') stopTA();
+  ['home','ready','count','play','done'].forEach(function(s){$(s).classList.toggle('hidden',s!==id)});window.scrollTo(0,0);
+}
+
+function start(level){
+  stopTA(); st.level=level; st.idx=0; st.score=0; st.log=[];
+  if(st.mode==='ta'){
+    $('readyLv').textContent='レベル'+level+' ・ '+LNAME[level];
+    var b=getBest(level); $('readyBest').textContent=b?'これまでのベスト: '+b+'問':'';
+    show('ready');
+  }else{ playUI(); show('play'); newQ(); }
+}
+function playUI(){
+  var ta=st.mode==='ta';
+  $('dots').classList.toggle('hidden',ta); $('timer').classList.toggle('hidden',!ta);
+  // タイムアタックでは「切り捨て? 切り上げ?」の手順を出さない
+  $('s2').classList.toggle('hidden',ta);
+  document.querySelector('#s3 .num').textContent=ta?'02':'03';
+  document.querySelector('#s4 .num').textContent=ta?'03':'04';
+}
+function go(){ // タイムアタック:3秒前からカウントダウン
+  show('count'); var n=3;
+  (function step(){
+    if(n===0){ begin(); return; }
+    var c=$('countNum'); c.textContent=n; c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+    n--; st.adv=setTimeout(step,1000);
+  })();
+}
+function begin(){ // タイムアタック開始
+  st.idx=0; st.score=0; playUI(); show('play');
+  st.run=true; st.end=Date.now()+LIMIT*1000; tick(); st.tick=setInterval(tick,100);
+  newQ();
+}
+function tick(){
+  var left=st.end-Date.now();
+  if(left<=0){ endTA(true); return; }
+  $('tsec').textContent=Math.ceil(left/1000);
+  $('tbar').style.width=(left/LIMIT/10)+'%';
+  $('timer').classList.toggle('warn',left<=10000);
+}
+function endTA(timeup){
+  var q=st.q, best=getBest(st.level);
+  stopTA();
+  $('doneMsg').textContent=timeup?'タイムアップ!':'ざんねん! まちがえたので、ここまで。';
+  $('doneScore').textContent=st.score; $('doneUnit').textContent=' 問';
+  $('doneNote').textContent='レベル'+st.level+' ・ '+LIMIT+'秒タイムアタックでとけた問題の数';
+  var a=$('doneAns'); a.classList.toggle('hidden',timeup);
+  if(!timeup) a.innerHTML='まちがえた問題:<br><b>'+q.n+'</b> を '+target(q)+'のがい数にすると <b>'+q.ans+'</b>';
+  var b=$('doneBest'); b.classList.remove('hidden');
+  if(st.score>best){ setBest(st.level,st.score); b.textContent='新きろく!'+(best?'(これまでのベスト: '+best+'問)':''); }
+  else b.textContent=best?'これまでのベスト: '+best+'問':'';
+  show('done');
+}
 
 function newQ(){
-  st.q=makeQ(st.level,st.idx); st.step=1; st.missed=false;
+  var ta=st.mode==='ta';
+  st.q=makeQ(st.level,ta?99:st.idx); st.missed=false;
+  // きほんモードの後半は「ま」「で」を自分でつける(md: 0=「ま」まち 1=「で」まち 2=ついている)
+  st.self=!ta&&st.idx>=TOTAL-SELF; st.step=st.self?0:1; st.md=st.self?0:2;
+  $('s0').classList.toggle('hidden',!st.self);
   var q=st.q;
-  $('prog').textContent='レベル'+st.level+' ・ '+(st.idx+1)+' / '+TOTAL+'問目';
-  var dots='';for(var i=0;i<TOTAL;i++){dots+='<i class="'+(i<st.idx?(st.log[i]?'done':'miss'):(i===st.idx?'now':''))+'"></i>'}
-  $('dots').innerHTML=dots;
-  $('qtext').innerHTML=q.n+' を、<em>'+(q.k?'上から'+q.k+'けた':PLACE[q.p]+'の位まで')+'</em>のがい数にしましょう。';
+  if(ta){
+    $('prog').textContent='レベル'+st.level+' ・ '+st.score+'問クリア';
+  }else{
+    $('prog').textContent='レベル'+st.level+' ・ '+(st.idx+1)+' / '+TOTAL+'問目';
+    var dots='';for(var i=0;i<TOTAL;i++){dots+='<i class="'+(i<st.idx?(st.log[i]?'done':'miss'):(i===st.idx?'now':''))+'"></i>'}
+    $('dots').innerHTML=dots;
+  }
+  $('qtext').innerHTML=q.n+' を、<em>'+target(q)+'</em>のがい数にしましょう。';
   $('nextBtn').classList.add('hidden');
-  ['r1','r2','r3','r4','b1','b2','b3','b4'].forEach(function(id){$(id).innerHTML=''});
+  ['r0','r1','r2','r3','r4','b0','b1','b2','b3','b4'].forEach(function(id){$(id).innerHTML=''});
   renderTiles(); renderStep();
 }
 
@@ -223,45 +352,69 @@ function renderTiles(){
   for(var i=0;i<s.length;i++){
     var e=s.length-1-i, slot='', sc='';
     // 「ま」=もとめる位、「で」=その1つ下の位(四捨五入する位)
-    var mark=e===q.p?'ま':(e===q.r?'で':'');
+    var mark=e===q.p?(st.md>=1?'ま':''):(e===q.r?(st.md>=2?'で':''):'');
     // 0は、四捨五入する数をタップしたと同時に、数の下に出す
-    if(st.step>=2&&e<q.p){slot='0';sc=' zero'+(st.step===2?' pop':'')}
+    if(st.step>=2&&e<q.p){slot='0';sc=' zero'+(st.step===2||(st.mode==='ta'&&st.step===4)?' pop':'')}
+    else if(st.step===4&&e===q.p){sc=' frame'} // どの位の数をえらぶのか、赤わくでしめす
     else if(st.step===5&&e===q.p){slot=q.ad;sc=' pop'}
     else if(st.step===5&&e>q.p){slot=s[i]}
     h+='<button class="tile'+(st.step>1&&e===q.r?' target':'')+'" data-e="'+e+'"><span class="mark">'+mark+'</span><small>'+PLACE[e]+'の位</small><span class="n">'+s[i]+'</span><span class="slot'+sc+'">'+slot+'</span></button>';
   }
-  var t=$('tiles'); t.innerHTML=h; t.classList.toggle('pick',st.step===1);
+  var t=$('tiles'); t.innerHTML=h; t.classList.toggle('pick',st.step<=1);
 }
 
 function renderStep(){
   var q=st.q;
-  [1,2,3,4].forEach(function(i){
+  [0,1,2,3,4].forEach(function(i){
     var el=$('s'+i); el.classList.toggle('active',st.step===i);
     el.classList.toggle('done',st.step>i||(i===3&&st.step>=2)); // 0は手順1のタップと同時に書かれる
     if(st.step!==i) $('b'+i).innerHTML='';
   });
+  if(st.step===0){
+    $('b0').innerHTML='<p class="ask">'+(st.md===0
+      ? '<b>'+target(q)+'</b>のがい数だね。「<b>ま</b>」をつける数字をタップしよう。'
+      : 'つぎに、「<b>で</b>」をつける数字をタップしよう。')+'</p><div id="hint"></div>';
+  }else if(st.self) $('r0').textContent='「ま」「で」をつけた';
+  if(st.step>=2){
+    $('r1').textContent=PLACE[q.r]+'の位の '+q.digit;
+    $('r3').textContent=PLACE[q.r]+'の位'+(q.r>0?'から下':'')+'は 0';
+  }
   if(st.step===1){
     $('b1').innerHTML='<p class="ask">上の数字の中から、<b>四捨五入する位の数字</b>をタップしよう。</p><div id="hint"></div>';
   }else if(st.step===2){
-    $('r1').textContent=PLACE[q.r]+'の位の '+q.digit;
-    $('r3').textContent=PLACE[q.r]+'の位'+(q.r>0?'から下':'')+'は 0';
     $('b2').innerHTML='<p class="ask">'+PLACE[q.r]+'の位の数字は <b>'+q.digit+'</b>。0〜4かな、5〜9かな?</p>'+
       '<div class="btns"><button class="btn" data-up="0">切り捨て<small>0・1・2・3・4</small></button>'+
       '<button class="btn" data-up="1">切り上げ<small>5・6・7・8・9</small></button></div><div id="hint"></div>';
   }else if(st.step===4){
-    $('r2').textContent=q.up?'5〜9。切り上げ。':'0〜4。切り捨て。';
-    var pad='';for(var d=0;d<10;d++)pad+='<button class="btn" data-d="'+d+'">'+d+'</button>';
-    $('b4').innerHTML='<p class="ask">'+(q.up?'切り上げ':'切り捨て')+'だから、<b>'+PLACE[q.p]+'の位</b>の数字はいくつになるかな?</p><div class="pad">'+pad+'</div><div id="hint"></div>';
+    var ta=st.mode==='ta';
+    if(!ta) $('r2').textContent=q.up?'5〜9。切り上げ。':'0〜4。切り捨て。';
+    // もとめる位の数字を2たくでえらぶ(そのまま か 1ふやす か)
+    var pad='';[q.pd,q.pd+1].forEach(function(d){pad+='<button class="btn two" data-d="'+d+'">'+d+'</button>'});
+    $('b4').innerHTML='<p class="ask">'+(ta?'':(q.up?'切り上げ':'切り捨て')+'だから、')+'<b>'+PLACE[q.p]+'の位</b>の数字は、どちらになるかな?</p><div class="btns">'+pad+'</div><div id="hint"></div>';
   }
 }
 
-function hint(msg){st.missed=true;var h=$('hint');if(h)h.innerHTML='<p class="hint">'+msg+'</p>'}
+// まちがえたとき。タイムアタックでは、そこで終了
+function hint(msg){
+  if(st.mode==='ta'){
+    st.step=9; stopTA();
+    st.adv=setTimeout(function(){endTA(false)},700);
+    return;
+  }
+  st.missed=true;var h=$('hint');if(h)h.innerHTML='<p class="hint">'+msg+'</p>';
+}
 
 function finishQ(){
   var q=st.q, how=(q.up?PLACE[q.p]+'の位に1をたして '+q.ad+'。':PLACE[q.p]+'の位は '+q.ad+' のまま。')+PLACE[q.r]+'の位'+(q.r>0?'から下':'')+'は0。';
   st.step=5; renderTiles(); renderStep();
   $('r4').textContent='答えは '+q.ans;
   $('b4').innerHTML='<p class="good"><b>正かい!</b> '+how+'</p>';
+  if(st.mode==='ta'){ // 自動でつぎの問題へ
+    st.score++; st.idx++;
+    $('prog').textContent='レベル'+st.level+' ・ '+st.score+'問クリア';
+    st.adv=setTimeout(function(){ if(st.run){ newQ(); window.scrollTo(0,0); } },700);
+    return;
+  }
   st.log[st.idx]=!st.missed; if(!st.missed) st.score++;
   var d=$('dots').children[st.idx]; d.className=st.missed?'miss':'done';
   var nb=$('nextBtn'); nb.textContent=st.idx+1<TOTAL?'つぎの問題へ →':'けっかを見る →'; nb.classList.remove('hidden');
@@ -269,16 +422,38 @@ function finishQ(){
 }
 
 // --- 操作 ---
+function setMode(m){
+  st.mode=m;
+  document.querySelectorAll('.mode').forEach(function(b){b.classList.toggle('on',b.dataset.mode===m)});
+  $('levels').classList.toggle('ta',m==='ta');
+  $('lead').textContent=m==='ta'
+    ? LIMIT+'秒で何問とけるかな? まちがえたら、そこでおわり。レベルをえらんでね。'
+    : '四捨五入で、がい数にしよう。レベルをえらんでね。';
+}
+$('ver').textContent=VERSION; setMode('basic');
+document.querySelectorAll('.mode').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
 document.querySelectorAll('.level').forEach(function(b){b.addEventListener('click',function(){start(+b.dataset.level)})});
 $('backBtn').addEventListener('click',function(){show('home')});
+$('backBtn2').addEventListener('click',function(){show('home')});
 $('homeBtn').addEventListener('click',function(){show('home')});
 $('againBtn').addEventListener('click',function(){start(st.level)});
+$('goBtn').addEventListener('click',go);
 
 $('tiles').addEventListener('click',function(ev){
-  if(st.step!==1) return;
+  if(st.step>1) return;
   var t=ev.target.closest('.tile'); if(!t) return;
   var q=st.q, e=+t.dataset.e;
-  if(e===q.r){ st.step=2; renderTiles(); renderStep(); }
+  if(st.step===0){ // 「ま」「で」をつける
+    if(e===(st.md===0?q.p:q.r)){ st.md++; if(st.md===2) st.step=1; renderTiles(); renderStep(); }
+    else{
+      t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake');
+      hint(st.md===1 ? '「で」は、「ま」の<b>1つ右</b>の数字につけるよ。'
+        : q.k ? '上から'+q.k+'けたのがい数だから、<b>上から'+q.k+'けた目</b>に「ま」をつけるよ。'
+        : '「'+PLACE[q.p]+'の位まで」だから、<b>'+PLACE[q.p]+'の位</b>の数字に「ま」をつけるよ。');
+    }
+    return;
+  }
+  if(e===q.r){ st.step=st.mode==='ta'?4:2; renderTiles(); renderStep(); }
   else{
     t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake');
     hint(q.k
@@ -306,7 +481,9 @@ $('nextBtn').addEventListener('click',function(){
   st.idx++;
   if(st.idx<TOTAL){ newQ(); window.scrollTo(0,0); }
   else{
-    $('doneScore').textContent=st.score;
+    $('doneScore').textContent=st.score; $('doneUnit').textContent=' / '+TOTAL+'問';
+    $('doneNote').textContent='1回で正かいできた問題の数';
+    $('doneAns').classList.add('hidden'); $('doneBest').classList.add('hidden');
     $('doneMsg').textContent=st.score===TOTAL?'ぜんぶ1回で正かい! すばらしい!':st.score>=7?'よくできました!':'さいごまでがんばったね!';
     show('done');
   }
