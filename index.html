@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>がい数れんしゅう v2.3</title>
+<title>がい数れんしゅう v2.4</title>
 <style>
 :root{
   --bg:#f6f1e7; --card:#fffdf8; --ink:#2b2a33; --sub:#6b6875; --line:#e2d9c8;
@@ -158,6 +158,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
       <p style="margin:0;color:var(--sub)" id="readyLv"></p>
       <ul>
         <li>60秒で何問とけるかチャレンジ!</li>
+        <li>「ま」「で」も自分でつけよう</li>
         <li>1回でもまちがえたら、そこでおわり</li>
       </ul>
       <p class="best" id="readyBest" style="margin:12px 0 0;font-weight:700;color:var(--ok)"></p>
@@ -230,12 +231,12 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
-var VERSION='v2.3';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var VERSION='v2.4';   // バージョン番号(ここを書きかえると、バッジも変わる)
 var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
 var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス'};
 var TOTAL=10;
-var SELF=4;          // きほんモードで、さいごの何問を「ま」「で」も自分でつける問題にするか
+var SELF=4;          // きほんモードで、さいごの何問を「ま」「で」も自分でつける問題にするか(タイムアタックは全問)
 // きほんモードで、はじめに出す決まった問題(レベル1はスライドの例題)
 var FIXED={
   1:[{n:1380,p:3},{n:1640,p:3}],
@@ -330,8 +331,8 @@ function endTA(timeup){
 function newQ(){
   var ta=st.mode==='ta';
   st.q=makeQ(st.level,ta?99:st.idx); st.missed=false;
-  // きほんモードの後半は「ま」「で」を自分でつける(md: 0=「ま」まち 1=「で」まち 2=ついている)
-  st.self=!ta&&st.idx>=TOTAL-SELF; st.step=st.self?0:1; st.md=st.self?0:2;
+  // タイムアタックは全問、きほんモードは後半だけ「ま」「で」を自分でつける(md: 0=「ま」まち 1=「で」まち 2=ついている)
+  st.self=ta||st.idx>=TOTAL-SELF; st.step=st.self?0:1; st.md=st.self?0:2;
   $('s0').classList.toggle('hidden',!st.self);
   var q=st.q;
   if(ta){
@@ -373,7 +374,7 @@ function renderStep(){
   if(st.step===0){
     $('b0').innerHTML='<p class="ask">'+(st.md===0
       ? '<b>'+target(q)+'</b>のがい数だね。「<b>ま</b>」をつける数字をタップしよう。'
-      : 'つぎに、「<b>で</b>」をつける数字をタップしよう。')+'</p><div id="hint"></div>';
+      : 'つぎに、「<b>で</b>」をつける数字をタップしよう。'+(st.mode==='ta'?'(「で」が四捨五入する位だよ)':''))+'</p><div id="hint"></div>';
   }else if(st.self) $('r0').textContent='「ま」「で」をつけた';
   if(st.step>=2){
     $('r1').textContent=PLACE[q.r]+'の位の '+q.digit;
@@ -427,7 +428,7 @@ function setMode(m){
   document.querySelectorAll('.mode').forEach(function(b){b.classList.toggle('on',b.dataset.mode===m)});
   $('levels').classList.toggle('ta',m==='ta');
   $('lead').textContent=m==='ta'
-    ? LIMIT+'秒で何問とけるかな? まちがえたら、そこでおわり。レベルをえらんでね。'
+    ? LIMIT+'秒で何問とけるかな?「ま」「で」も自分でつけるよ。まちがえたら、そこでおわり。'
     : '四捨五入で、がい数にしよう。レベルをえらんでね。';
 }
 $('ver').textContent=VERSION; setMode('basic');
@@ -444,7 +445,12 @@ $('tiles').addEventListener('click',function(ev){
   var t=ev.target.closest('.tile'); if(!t) return;
   var q=st.q, e=+t.dataset.e;
   if(st.step===0){ // 「ま」「で」をつける
-    if(e===(st.md===0?q.p:q.r)){ st.md++; if(st.md===2) st.step=1; renderTiles(); renderStep(); }
+    if(e===(st.md===0?q.p:q.r)){
+      st.md++;
+      // タイムアタックは「で」をつけたら、そのまま四捨五入する位が見つかったことにして0を出す
+      if(st.md===2) st.step=st.mode==='ta'?4:1;
+      renderTiles(); renderStep();
+    }
     else{
       t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake');
       hint(st.md===1 ? '「で」は、「ま」の<b>1つ右</b>の数字につけるよ。'
