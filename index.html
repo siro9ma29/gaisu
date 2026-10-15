@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>がい数れんしゅう v2.4</title>
+<title>がい数れんしゅう v2.5</title>
 <style>
 :root{
   --bg:#f6f1e7; --card:#fffdf8; --ink:#2b2a33; --sub:#6b6875; --line:#e2d9c8;
@@ -113,6 +113,26 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
   color:#fff;font-size:21px;font-weight:700;box-shadow:0 5px 0 #154f63}
 .next:active{transform:translateY(3px);box-shadow:none}
 
+/* レベル5・6(はんい/以上・以下・未満) */
+.bigt{font-size:clamp(40px,12vw,64px);font-weight:700;color:var(--main);line-height:1.2;font-variant-numeric:tabular-nums}
+.oxlist{display:grid;gap:8px}
+.oxrow{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:6px 10px}
+.oxrow.shake{animation:shake .3s;border-color:var(--ng);background:var(--ng-soft)}
+.oxn{flex:1;font-size:clamp(26px,7vw,34px);font-weight:700;font-variant-numeric:tabular-nums}
+.ox{flex:none;width:64px;height:54px;border-radius:12px;border:3px solid var(--main);background:#fff;font-size:30px;font-weight:700;
+  box-shadow:0 4px 0 var(--main-soft);padding:0}
+.ox:active{transform:translateY(3px);box-shadow:none}
+.oxmark{flex:none;font-size:32px;font-weight:700} .oxmark.o{color:var(--ok)} .oxmark.x{color:var(--ng)}
+.oxwhy{flex:none;color:var(--sub);font-size:15px;min-width:5.5em;text-align:right}
+.btns.three{grid-template-columns:repeat(3,1fr)}
+.btn.num{font-size:26px;font-variant-numeric:tabular-nums}
+.sent{font-size:clamp(18px,5vw,22px);font-weight:700;text-align:center;margin:0 0 12px;line-height:2}
+.bl{display:inline-block;min-width:3.4em;border-bottom:3px solid var(--hi);margin:0 4px;color:var(--ok)}
+.prev{margin:0 0 8px;color:var(--ok);font-weight:700}
+.nlbox{margin-top:12px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px 8px 4px}
+.nl{width:100%;height:auto;display:block}
+.nlleg{margin:2px 0 4px;text-align:center;font-size:15px;color:var(--sub)}
+
 /* けっか */
 .result{text-align:center;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:28px 16px}
 .result .big{font-size:56px;font-weight:700;color:var(--main);line-height:1.2;margin:8px 0}
@@ -138,6 +158,8 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
       <button class="level" data-level="2"><span class="badge">2</span><span><b>いろいろな位までのがい数</b><span class="d">百の位まで・千の位まで・一万の位まで</span></span></button>
       <button class="level" data-level="3"><span class="badge">3</span><span><b>上から○けたのがい数</b><span class="d">上から1けた・上から2けたのがい数にする</span></span></button>
       <button class="level" data-level="4"><span class="badge">4</span><span><b>ミックス</b><span class="d">レベル1〜3の問題が、まざって出る</span></span></button>
+      <button class="level" data-level="5"><span class="badge">5</span><span><b>がい数のはんい</b><span class="d">百の位までのがい数にすると300になる整数は?</span></span></button>
+      <button class="level" data-level="6"><span class="badge">6</span><span><b>以上・以下・未満</b><span class="d">ことばの意味をおぼえて、入る数をはんだんする</span></span></button>
     </div>
     <div class="howto">
       <b>がい数のもとめ方</b>
@@ -158,7 +180,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
       <p style="margin:0;color:var(--sub)" id="readyLv"></p>
       <ul>
         <li>60秒で何問とけるかチャレンジ!</li>
-        <li>「ま」「で」も自分でつけよう</li>
+        <li id="readyMD">「ま」「で」も自分でつけよう</li>
         <li>1回でもまちがえたら、そこでおわり</li>
       </ul>
       <p class="best" id="readyBest" style="margin:12px 0 0;font-weight:700;color:var(--ok)"></p>
@@ -189,7 +211,14 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
       <div class="tiles" id="tiles"></div>
     </div>
 
-    <div class="steps">
+    <div class="steps hidden" id="xsteps">
+      <div class="step" id="x1"><div class="shead"><span class="num">01</span><span class="stitle" id="xt1"></span><span class="sres" id="xr1"></span></div><div class="sbody" id="xb1"></div></div>
+      <div class="step" id="x2"><div class="shead"><span class="num">02</span><span class="stitle" id="xt2"></span><span class="sres" id="xr2"></span></div><div class="sbody" id="xb2"></div></div>
+      <div class="step" id="x3"><div class="shead"><span class="num">03</span><span class="stitle" id="xt3"></span><span class="sres" id="xr3"></span></div><div class="sbody" id="xb3"></div></div>
+      <div id="xend"></div>
+    </div>
+
+    <div class="steps" id="stdSteps">
       <div class="step hidden" id="s0">
         <div class="shead"><span class="num">★</span><span class="stitle">「ま」「で」をつける</span><span class="sres" id="r0"></span></div>
         <div class="sbody" id="b0"></div>
@@ -231,10 +260,10 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
-var VERSION='v2.4';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var VERSION='v2.5';   // バージョン番号(ここを書きかえると、バッジも変わる)
 var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
-var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス'};
+var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス',5:'がい数のはんい',6:'以上・以下・未満'};
 var TOTAL=10;
 var SELF=4;          // きほんモードで、さいごの何問を「ま」「で」も自分でつける問題にするか(タイムアタックは全問)
 // きほんモードで、はじめに出す決まった問題(レベル1はスライドの例題)
@@ -268,6 +297,147 @@ function makeQ(level,idx){
 }
 function target(q){return q.k?'上から'+q.k+'けた':PLACE[q.p]+'の位まで'}
 
+// ===== レベル5・6 =====
+// 問題は「手順(steps)」のならび。type:'ox'=数ごとに○×、type:'pick'=ボタンからえらぶ(asksを順に)
+function r100(x){return Math.round(x/100)*100}
+function sortN(a){return a.sort(function(x,y){return x-y})}
+
+// レベル5:百の位までのがい数にすると T になる整数(1問目は300、7問目からは4けた)
+function makeX5(idx){
+  var T=(idx===0)?300:(idx<6||st.mode==='ta'&&rnd(0,1))?rnd(2,9)*100:(function(){var t;do{t=rnd(11,99)*100}while(t%1000===0);return t})();
+  var lo=T-50, hi=T+49, items, oks;
+  do{ // さかいめの数を必ず入れて、○も×も出るようにする
+    var pool=[lo-1,lo,hi,hi+1,T-rnd(1,45),T+rnd(1,45),T-rnd(51,95),T+rnd(51,95)];
+    items=[rnd(0,1)?lo-1:lo, rnd(0,1)?hi:hi+1];
+    while(items.length<4){var v=pool[rnd(0,pool.length-1)]; if(items.indexOf(v)<0) items.push(v)}
+    oks=items.filter(function(x){return r100(x)===T}).length;
+  }while(oks===0||oks===4);
+  sortN(items);
+  var why=function(n){var d=Math.floor(n/10)%10;return n+' の十の位は '+d+'。'+(d>=5?'切り上げ':'切り捨て')+'て、'+r100(n)+' になるよ。'};
+  return {x:5,
+    text:'十の位を四捨五入して、<em>百の位までのがい数</em>にすると '+T+' になる整数を考えよう。',
+    show:'<div class="bigt">'+T+'</div><small style="color:var(--sub)">になる整数は?</small>',
+    steps:[
+      {title:T+' になる? ならない?',type:'ox',
+       ask:'それぞれの数を百の位までのがい数にすると、<b>'+T+'</b> になるかな? なるなら○、ならないなら×をえらぼう。',
+       items:items.map(function(n){return {n:n,ok:r100(n)===T,note:'→ '+r100(n)}}), why:why, res:'できた'},
+      {title:'いちばん小さい数・大きい数',type:'pick',asks:[
+        {q:T+' になる整数のうち、<b>いちばん小さい数</b>はどれかな?',ch:[T-100,lo-1,lo],ans:lo,done:'小さい数は '+lo},
+        {q:'では、<b>いちばん大きい数</b>はどれかな?',ch:[hi,hi+1,T+99],ans:hi,done:'大きい数は '+hi}],
+       why:function(c){return c+' を百の位までのがい数にすると '+r100(c)+' になるから、'+T+' にはならないよ。'},
+       res:function(){return lo+' 〜 '+hi}},
+      {title:'「以上」「未満」で表す',type:'pick',
+       sent:function(a){return T+' になる整数は、<br>'+lo+'<span class="bl">'+(a[0]||'?')+'</span> '+(hi+1)+'<span class="bl">'+(a[1]||'?')+'</span>'},
+       asks:[
+        {q:lo+' は '+T+' になる数に<b>入る</b>ね。'+lo+' のあとに入ることばは?',ch:['以上','未満'],ans:'以上',
+         why:lo+' は入る数だね。その数を<b>ふくむ</b>ときは「以上」をつかうよ。'},
+        {q:(hi+1)+' は '+T+' になるかな? '+(hi+1)+' のあとに入ることばは?',ch:['以下','未満'],ans:'未満',
+         why:(hi+1)+' は四捨五入すると '+(T+100)+' になるから、入らないね。その数を<b>ふくまない</b>ときは「未満」をつかうよ。'}],
+       res:function(){return lo+'以上 '+(hi+1)+'未満'}}
+    ],
+    nl:{a:lo,ac:true,b:hi+1,bc:false,mid:T},
+    good:'<b>正かい!</b> '+T+' になる整数は、<b>'+lo+' 以上 '+(hi+1)+' 未満</b>。'+lo+' から '+hi+' までの数だよ。',
+    ansText:T+' になる整数のはんいは <b>'+lo+' 以上 '+(hi+1)+' 未満</b>('+lo+' から '+hi+' まで)'};
+}
+
+// レベル6:以上・以下・未満(7問目からは「○以上○未満」などのはんい)
+var W6={ge:'以上',le:'以下',lt:'未満'}, INC6={ge:true,le:true,lt:false};
+var RULE6={ge:'「以上」は、その数と、それより大きい数のこと。その数を<b>ふくむ</b>よ。',
+  le:'「以下」は、その数と、それより小さい数のこと。その数を<b>ふくむ</b>よ。',
+  lt:'「未満」は、その数より小さい数のこと。その数は<b>ふくまない</b>よ。'};
+var FIXED6=[{k:'ge',a:50},{k:'lt',a:50}];
+function makeX6(idx){
+  var range=st.mode==='ta'?rnd(0,2)===0:idx>=6, f=st.mode==='ta'?null:FIXED6[idx];
+  var a,b,k,k2,cond,items,inside,why,s1,good,nl;
+  if(!range){
+    k=f?f.k:['ge','le','lt'][rnd(0,2)]; a=f?f.a:rnd(2,19)*5; cond=a+W6[k];
+    inside=function(n){return k==='ge'?n>=a:k==='le'?n<=a:n<a};
+    var far=a+(rnd(0,1)?1:-1)*rnd(3,9);
+    items=sortN([a-1,a,a+1,far]);
+    why=function(n){return n+' は '+a+(n===a?' と同じ数':n>a?' より大きい数':' より小さい数')+'。'+RULE6[k]};
+    s1=[{q:'「'+cond+'」は、'+a+' を ふくむ? ふくまない?',ch:['ふくむ','ふくまない'],ans:INC6[k]?'ふくむ':'ふくまない',
+         done:a+' を'+(INC6[k]?'ふくむ':'ふくまない'),why:RULE6[k]}];
+    good='<b>正かい!</b> 「'+cond+'」は、'+(k==='ge'?a+' と、'+a+' より大きい数':k==='le'?a+' と、'+a+' より小さい数':a+' より小さい数('+a+' は入らない)')+'。';
+    nl={a:a,ac:INC6[k],dir:k==='ge'?'r':'l'};
+  }else{
+    a=rnd(1,8)*10; b=a+rnd(1,4)*10; k2=rnd(0,1)?'lt':'le'; cond=a+'以上'+b+W6[k2];
+    inside=function(n){return n>=a&&(k2==='lt'?n<b:n<=b)};
+    var mid=rnd(0,1)?b-1:a+rnd(2,b-a-2);
+    items=sortN([a-1,a,mid,b,b+1]);
+    why=function(n){
+      if(n<a) return n+' は '+a+' より小さいから、入らないよ。';
+      if(n===a) return '「'+a+'以上」だから、'+a+' はふくむよ。';
+      if(n<b) return n+' は '+a+' より大きくて '+b+' より小さいから、入るよ。';
+      if(n===b) return '「'+b+W6[k2]+'」だから、'+b+' は'+(k2==='lt'?'ふくまない':'ふくむ')+'よ。';
+      return n+' は '+b+' より大きいから、入らないよ。';
+    };
+    s1=[{q:'「'+cond+'」は、'+a+' を ふくむ? ふくまない?',ch:['ふくむ','ふくまない'],ans:'ふくむ',done:a+' をふくむ',why:RULE6.ge},
+        {q:'では、'+b+' を ふくむ? ふくまない?',ch:['ふくむ','ふくまない'],ans:INC6[k2]?'ふくむ':'ふくまない',
+         done:b+' を'+(INC6[k2]?'ふくむ':'ふくまない'),why:RULE6[k2]}];
+    good='<b>正かい!</b> 「'+cond+'」には、'+a+' は入って、'+b+' は'+(k2==='lt'?'入らない':'入る')+'。';
+    nl={a:a,ac:true,b:b,bc:k2==='le'};
+  }
+  return {x:6,
+    text:'「<em>'+cond+'</em>」の数について考えよう。',
+    show:'<div class="bigt">'+cond+'</div>',
+    steps:[
+      {title:'ふくむ? ふくまない?',type:'pick',asks:s1,res:function(){return s1.map(function(s){return s.done}).join('・')}},
+      {title:'「'+cond+'」に入る?',type:'ox',
+       ask:'つぎの数は「<b>'+cond+'</b>」に入るかな? 入るなら○、入らないなら×をえらぼう。',
+       items:items.map(function(n){return {n:n,ok:inside(n),note:inside(n)?'入る':'入らない'}}), why:why, res:'できた'}
+    ],
+    nl:nl, good:good, ansText:good.replace(/<[^>]+>/g,'').replace('正かい! ','')};
+}
+
+// 数直線(●=ふくむ ○=ふくまない)
+function numLine(o){
+  var two=o.b!==undefined, xa=two?160:300, xb=440, x0, x1, h='', C='var(--ng)';
+  if(two){x0=xa;x1=xb}else if(o.dir==='r'){x0=xa;x1=572}else{x0=28;x1=xa}
+  h+='<line x1="12" y1="36" x2="588" y2="36" style="stroke:var(--sub);stroke-width:2"/>';
+  h+='<line x1="'+x0+'" y1="36" x2="'+x1+'" y2="36" style="stroke:'+C+';stroke-width:9;stroke-linecap:round"/>';
+  if(!two) h+=o.dir==='r'?'<polygon points="572,24 594,36 572,48" style="fill:'+C+'"/>':'<polygon points="28,24 6,36 28,48" style="fill:'+C+'"/>';
+  var dot=function(x,c,lab){return '<circle cx="'+x+'" cy="36" r="10" style="fill:'+(c?C:'#fff')+';stroke:'+C+';stroke-width:4"/>'+
+    '<text x="'+x+'" y="76" text-anchor="middle" style="fill:var(--ink);font-size:22px;font-weight:700">'+lab+'</text>'};
+  if(o.mid!==undefined) h+='<line x1="300" y1="28" x2="300" y2="44" style="stroke:var(--ink);stroke-width:2"/><text x="300" y="76" text-anchor="middle" style="fill:var(--sub);font-size:18px">('+o.mid+')</text>';
+  h+=dot(xa,o.ac,o.a); if(two) h+=dot(xb,o.bc,o.b);
+  return '<div class="nlbox"><svg class="nl" viewBox="0 0 600 86" role="img" aria-label="数直線">'+h+'</svg><p class="nlleg">● … その数をふくむ ○ … その数をふくまない</p></div>';
+}
+
+function renderX(){
+  var q=st.q;
+  [0,1,2].forEach(function(i){
+    var S=q.steps[i], el=$('x'+(i+1));
+    el.classList.toggle('hidden',!S); if(!S) return;
+    el.classList.toggle('active',st.xs===i); el.classList.toggle('done',st.xs>i);
+    $('xt'+(i+1)).innerHTML=S.title;
+    $('xr'+(i+1)).textContent=st.xs>i?(typeof S.res==='function'?S.res():S.res):'';
+    var b=$('xb'+(i+1)); if(st.xs!==i){b.innerHTML='';return}
+    var h='';
+    if(S.type==='ox'){
+      h+='<p class="ask">'+S.ask+'</p><div class="oxlist">';
+      S.items.forEach(function(it,j){
+        h+='<div class="oxrow" data-row="'+j+'"><span class="oxn">'+it.n+'</span>'+(st.xd[j]
+          ? '<span class="oxmark '+(it.ok?'o':'x')+'">'+(it.ok?'○':'×')+'</span><span class="oxwhy">'+it.note+'</span>'
+          : '<button class="ox" data-j="'+j+'" data-v="1">○</button><button class="ox" data-j="'+j+'" data-v="0">×</button>')+'</div>';
+      });
+      h+='</div>';
+    }else{
+      if(S.sent) h+='<p class="sent">'+S.sent(st.xp)+'</p>';
+      else for(var p=0;p<st.xa;p++) h+='<p class="prev">✓ '+S.asks[p].done+'</p>';
+      var A=S.asks[st.xa];
+      h+='<p class="ask">'+A.q+'</p><div class="btns'+(A.ch.length===3?' three':'')+'">';
+      A.ch.forEach(function(c,j){h+='<button class="btn'+(typeof c==='number'?' num':'')+'" data-c="'+j+'">'+c+'</button>'});
+      h+='</div>';
+    }
+    b.innerHTML=h+'<div id="hint"></div>';
+  });
+}
+function nextX(){
+  st.xs++; st.xa=0; st.xp=[];
+  if(st.xs>=st.q.steps.length){ renderX(); $('xend').innerHTML='<p class="good">'+st.q.good+'</p>'+numLine(st.q.nl); afterSolve(); }
+  else renderX();
+}
+
 // --- じこベスト(タイムアタック)。保存できない端末でも動く ---
 function getBest(level){try{return +localStorage.getItem('gaisu_ta_best_'+level)||0}catch(e){return 0}}
 function setBest(level,v){try{localStorage.setItem('gaisu_ta_best_'+level,v)}catch(e){}}
@@ -283,6 +453,7 @@ function start(level){
   if(st.mode==='ta'){
     $('readyLv').textContent='レベル'+level+' ・ '+LNAME[level];
     var b=getBest(level); $('readyBest').textContent=b?'これまでのベスト: '+b+'問':'';
+    $('readyMD').classList.toggle('hidden',level>=5);
     show('ready');
   }else{ playUI(); show('play'); newQ(); }
 }
@@ -321,7 +492,7 @@ function endTA(timeup){
   $('doneScore').textContent=st.score; $('doneUnit').textContent=' 問';
   $('doneNote').textContent='レベル'+st.level+' ・ '+LIMIT+'秒タイムアタックでとけた問題の数';
   var a=$('doneAns'); a.classList.toggle('hidden',timeup);
-  if(!timeup) a.innerHTML='まちがえた問題:<br><b>'+q.n+'</b> を '+target(q)+'のがい数にすると <b>'+q.ans+'</b>';
+  if(!timeup) a.innerHTML='まちがえた問題:<br>'+(q.x?q.ansText:'<b>'+q.n+'</b> を '+target(q)+'のがい数にすると <b>'+q.ans+'</b>');
   var b=$('doneBest'); b.classList.remove('hidden');
   if(st.score>best){ setBest(st.level,st.score); b.textContent='新きろく!'+(best?'(これまでのベスト: '+best+'問)':''); }
   else b.textContent=best?'これまでのベスト: '+best+'問':'';
@@ -329,23 +500,34 @@ function endTA(timeup){
 }
 
 function newQ(){
-  var ta=st.mode==='ta';
+  var ta=st.mode==='ta', X=st.level>=5;
+  $('stdSteps').classList.toggle('hidden',X); $('xsteps').classList.toggle('hidden',!X); $('xend').innerHTML='';
+  if(X){ // レベル5・6
+    st.q=(st.level===5?makeX5:makeX6)(ta?99:st.idx); st.missed=false; st.step=99; st.xs=0; st.xa=0; st.xd=[]; st.xp=[];
+    progUI(); $('nextBtn').classList.add('hidden');
+    $('qtext').innerHTML=st.q.text; var t=$('tiles'); t.classList.remove('pick'); t.innerHTML='<div>'+st.q.show+'</div>';
+    renderX(); return;
+  }
   st.q=makeQ(st.level,ta?99:st.idx); st.missed=false;
   // タイムアタックは全問、きほんモードは後半だけ「ま」「で」を自分でつける(md: 0=「ま」まち 1=「で」まち 2=ついている)
   st.self=ta||st.idx>=TOTAL-SELF; st.step=st.self?0:1; st.md=st.self?0:2;
   $('s0').classList.toggle('hidden',!st.self);
   var q=st.q;
-  if(ta){
+  progUI();
+  $('qtext').innerHTML=q.n+' を、<em>'+target(q)+'</em>のがい数にしましょう。';
+  $('nextBtn').classList.add('hidden');
+  ['r0','r1','r2','r3','r4','b0','b1','b2','b3','b4'].forEach(function(id){$(id).innerHTML=''});
+  renderTiles(); renderStep();
+}
+
+function progUI(){
+  if(st.mode==='ta'){
     $('prog').textContent='レベル'+st.level+' ・ '+st.score+'問クリア';
   }else{
     $('prog').textContent='レベル'+st.level+' ・ '+(st.idx+1)+' / '+TOTAL+'問目';
     var dots='';for(var i=0;i<TOTAL;i++){dots+='<i class="'+(i<st.idx?(st.log[i]?'done':'miss'):(i===st.idx?'now':''))+'"></i>'}
     $('dots').innerHTML=dots;
   }
-  $('qtext').innerHTML=q.n+' を、<em>'+target(q)+'</em>のがい数にしましょう。';
-  $('nextBtn').classList.add('hidden');
-  ['r0','r1','r2','r3','r4','b0','b1','b2','b3','b4'].forEach(function(id){$(id).innerHTML=''});
-  renderTiles(); renderStep();
 }
 
 function renderTiles(){
@@ -410,6 +592,9 @@ function finishQ(){
   st.step=5; renderTiles(); renderStep();
   $('r4').textContent='答えは '+q.ans;
   $('b4').innerHTML='<p class="good"><b>正かい!</b> '+how+'</p>';
+  afterSolve();
+}
+function afterSolve(){ // 1問とけたあと(全レベル共通)
   if(st.mode==='ta'){ // 自動でつぎの問題へ
     st.score++; st.idx++;
     $('prog').textContent='レベル'+st.level+' ・ '+st.score+'問クリア';
@@ -481,6 +666,29 @@ $('b4').addEventListener('click',function(ev){
   if(d===q.ad){ finishQ(); return; }
   b.classList.add('wrong');
   hint(q.up?'切り上げだから、'+PLACE[q.p]+'の位の '+q.pd+' に1をたすよ。':'切り捨てだから、'+PLACE[q.p]+'の位の数字は '+q.pd+' のままだよ。');
+});
+
+// レベル5・6の操作
+$('xsteps').addEventListener('click',function(ev){
+  if(st.level<5||(st.mode==='ta'&&!st.run)) return;
+  var q=st.q, S=q.steps[st.xs]; if(!S) return;
+  var b=ev.target.closest('button'); if(!b||!b.closest('#xb'+(st.xs+1))) return;
+  if(S.type==='ox'&&b.dataset.j!==undefined){
+    var j=+b.dataset.j, it=S.items[j];
+    if((b.dataset.v==='1')===it.ok){
+      st.xd[j]=true; $('hint')&&($('hint').innerHTML='');
+      if(S.items.every(function(_,i){return st.xd[i]})) nextX(); else renderX();
+    }else{
+      var row=b.closest('.oxrow'); row.classList.remove('shake'); void row.offsetWidth; row.classList.add('shake');
+      hint(S.why(it.n));
+    }
+  }else if(S.type==='pick'&&b.dataset.c!==undefined){
+    var A=S.asks[st.xa], c=A.ch[+b.dataset.c];
+    if(c===A.ans){
+      st.xp.push(c); st.xa++;
+      if(st.xa>=S.asks.length){ nextX(); } else renderX();
+    }else{ b.classList.add('wrong'); hint(A.why||S.why(c)); }
+  }
 });
 
 $('nextBtn').addEventListener('click',function(){
