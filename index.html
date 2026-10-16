@@ -172,6 +172,50 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .result .ans{margin:14px 0 0;padding:10px 12px;border-radius:12px;background:var(--ng-soft);color:#7d2f1f;font-size:17px}
 .result .best{margin:12px 0 0;font-weight:700;color:var(--ok)}
 .second{display:block;width:100%;margin-top:10px;min-height:56px;border:2px solid var(--line);border-radius:16px;background:var(--card);font-size:18px}
+
+/* タイムアタック:タブレット横画面では、スクロールしなくても操作できるように
+   左=問題の数、右=手順 の2列にして、全体を1画面におさめる */
+@media (orientation:landscape) and (min-width:800px){
+  body.tamode .wrap{max-width:1240px;padding:10px 16px}
+  body.tamode #play{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas:"top top" "timer timer" "q steps";column-gap:16px;align-items:start}
+  body.tamode #play .top{grid-area:top;margin-bottom:4px}
+  body.tamode #timer{grid-area:timer;margin-bottom:8px}
+  body.tamode .qbox{grid-area:q;padding:12px}
+  body.tamode #stdSteps,body.tamode #xsteps{grid-area:steps;margin-top:0;gap:8px}
+  body.tamode .qtext{margin-bottom:8px}
+  body.tamode .step{padding:8px 12px}
+  body.tamode .num{width:34px;height:34px}
+  body.tamode .sbody{margin-top:6px}
+  body.tamode .ask{margin-bottom:8px;line-height:1.45}
+  body.tamode .btn.two{min-height:64px}
+  /* レベル5・6 */
+  body.tamode .bigt{font-size:clamp(40px,9vh,64px)}
+  body.tamode .oxlist{gap:6px}
+  body.tamode .oxrow{padding:3px 10px}
+  body.tamode .oxn{font-size:28px}
+  body.tamode .ox{height:46px}
+  body.tamode .minmax{margin-bottom:8px}
+  body.tamode .minmax b{font-size:clamp(30px,7vh,46px)}
+  body.tamode .sent{margin-bottom:8px;line-height:1.8}
+  body.tamode .btn{min-height:54px}
+  body.tamode #xend .good{margin-top:8px}
+  body.tamode .nlbox{margin-top:8px}
+}
+/* 高さが低い横画面では、数字のマスも小さくする */
+@media (orientation:landscape) and (min-width:800px) and (max-height:760px){
+  body.tamode .tile .n{height:clamp(58px,13vh,96px)}
+  body.tamode .mark{height:clamp(28px,6vh,44px)}
+  body.tamode .slot{height:clamp(36px,8vh,62px)}
+}
+@media (orientation:landscape) and (min-width:800px) and (max-height:660px){
+  body.tamode .wrap{padding-top:6px;padding-bottom:6px}
+  body.tamode #timer{margin-bottom:6px}
+  body.tamode .oxrow{padding:2px 10px}
+  body.tamode .ox{height:42px}
+  body.tamode .oxn{font-size:26px}
+  body.tamode .btn{min-height:50px}
+}
 </style>
 </head>
 <body>
@@ -296,7 +340,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
-var VERSION='v2.8';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var VERSION='v2.9';   // バージョン番号(ここを書きかえると、バッジも変わる)
 var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
 var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス',5:'以上・以下・未満',6:'がい数のはんい'};
@@ -540,6 +584,7 @@ function start(level){
 }
 function playUI(){
   var ta=st.mode==='ta';
+  document.body.classList.toggle('tamode',ta); // 横画面で2列にする(CSS)
   $('dots').classList.toggle('hidden',ta); $('timer').classList.toggle('hidden',!ta);
   // タイムアタックでは「切り捨て? 切り上げ?」の手順を出さない
   $('s2').classList.toggle('hidden',ta);
