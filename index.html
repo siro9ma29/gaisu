@@ -123,6 +123,9 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
   box-shadow:0 4px 0 var(--main-soft);padding:0}
 .ox:active{transform:translateY(3px);box-shadow:none}
 .oxmark{flex:none;font-size:32px;font-weight:700} .oxmark.o{color:var(--ok)} .oxmark.x{color:var(--ng)}
+/* レベル6手順1のヒント:百の位に「ま」、十の位に「で」 */
+.oxn .dg{display:inline-flex;flex-direction:column;align-items:center;line-height:1;vertical-align:bottom}
+.oxn .dg i{font-style:normal;font-size:.5em;height:1.1em;color:var(--ng)}
 .oxwhy{flex:none;color:var(--sub);font-size:15px;min-width:5.5em;text-align:right}
 .btns.three{grid-template-columns:repeat(3,1fr)}
 /* はんいの手順3:手順2の答え(いちばん小さい数・大きい数)を大きく見せる */
@@ -340,7 +343,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
-var VERSION='v2.9';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var VERSION='v3.0';   // バージョン番号(ここを書きかえると、バッジも変わる)
 var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
 var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス',5:'以上・以下・未満',6:'がい数のはんい'};
@@ -403,7 +406,8 @@ function makeHani(idx){
     steps:[
       {title:T+' になる? ならない?',type:'ox',
        ask:'それぞれの数を百の位までのがい数にすると、<b>'+T+'</b> になるかな? なるなら○、ならないなら×をえらぼう。',
-       items:items.map(function(n){return {n:n,ok:r100(n)===T,note:'→ '+r100(n)}}), why:why, res:'できた'},
+       items:items.map(function(n){return {n:n,ok:r100(n)===T,note:'→ '+r100(n)}}), why:why, res:'できた',
+       md:st.mode!=='ta'&&idx<6}, // 基本モードの1〜6問目は「ま」「で」をヒントに表示。7問目からはなし
       {title:'いちばん小さい数・大きい数',type:'pick',asks:[
         {q:T+' になる整数のうち、<b>いちばん小さい数</b>はどれかな?',ch:[T-100,lo-1,lo],ans:lo,done:'小さい数は '+lo},
         {q:'では、<b>いちばん大きい数</b>はどれかな?',ch:[hi,hi+1,T+99],ans:hi,done:'大きい数は '+hi}],
@@ -491,6 +495,12 @@ function numLine(o){
   return '<div class="nlbox"><svg class="nl" viewBox="0 0 600 86" role="img" aria-label="数直線">'+h+'</svg><p class="nlleg">● … その数をふくむ ○ … その数をふくまない</p></div>';
 }
 
+// 数字の上に「ま」(百の位)「で」(十の位)をつける
+function mdNum(n){
+  var s=String(n), L=s.length, h='';
+  for(var i=0;i<L;i++){var e=L-1-i; h+='<span class="dg"><i>'+(e===2?'ま':e===1?'で':'&nbsp;')+'</i>'+s[i]+'</span>'}
+  return h;
+}
 function renderX(){
   var q=st.q;
   [0,1,2].forEach(function(i){
@@ -504,7 +514,7 @@ function renderX(){
     if(S.type==='ox'){
       h+='<p class="ask">'+S.ask+'</p><div class="oxlist">';
       S.items.forEach(function(it,j){
-        h+='<div class="oxrow" data-row="'+j+'"><span class="oxn">'+it.n+'</span>'+(st.xd[j]
+        h+='<div class="oxrow" data-row="'+j+'"><span class="oxn">'+(S.md?mdNum(it.n):it.n)+'</span>'+(st.xd[j]
           ? '<span class="oxmark '+(it.ok?'o':'x')+'">'+(it.ok?'○':'×')+'</span><span class="oxwhy">'+it.note+'</span>'
           : '<button class="ox" data-j="'+j+'" data-v="1">○</button><button class="ox" data-j="'+j+'" data-v="0">×</button>')+'</div>';
       });
