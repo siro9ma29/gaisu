@@ -291,6 +291,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
     <div class="qbox">
       <p class="qtext" id="qtext"></p>
       <div class="tiles" id="tiles"></div>
+      <div id="qline"></div>
     </div>
 
     <div class="steps hidden" id="xsteps">
@@ -343,7 +344,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
-var VERSION='v3.0';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var VERSION='v3.1';   // バージョン番号(ここを書きかえると、バッジも変わる)
 var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
 var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス',5:'以上・以下・未満',6:'がい数のはんい'};
@@ -400,15 +401,15 @@ function makeHani(idx){
   }while(oks===0||oks===4);
   sortN(items);
   var why=function(n){var d=Math.floor(n/10)%10;return n+' の十の位は '+d+'。'+(d>=5?'切り上げ':'切り捨て')+'て、'+r100(n)+' になるよ。'};
-  return {x:6,
+  return {x:6,T:T,
     text:'十の位を四捨五入して、<em>百の位までのがい数</em>にすると '+T+' になる整数を考えよう。',
     show:'<div class="bigt">'+T+'</div><small style="color:var(--sub)">になる整数は?</small>',
     steps:[
       {title:T+' になる? ならない?',type:'ox',
        ask:'それぞれの数を百の位までのがい数にすると、<b>'+T+'</b> になるかな? なるなら○、ならないなら×をえらぼう。',
        items:items.map(function(n){return {n:n,ok:r100(n)===T,note:'→ '+r100(n)}}), why:why, res:'できた',
-       md:st.mode!=='ta'&&idx<6}, // 基本モードの1〜6問目は「ま」「で」をヒントに表示。7問目からはなし
-      {title:'いちばん小さい数・大きい数',type:'pick',asks:[
+       md:st.mode!=='ta'&&idx<6, line:true}, // 基本モードの1〜6問目は「ま」「で」をヒントに表示。7問目からはなし
+      {title:'いちばん小さい数・大きい数',type:'pick',line:true,asks:[
         {q:T+' になる整数のうち、<b>いちばん小さい数</b>はどれかな?',ch:[T-100,lo-1,lo],ans:lo,done:'小さい数は '+lo},
         {q:'では、<b>いちばん大きい数</b>はどれかな?',ch:[hi,hi+1,T+99],ans:hi,done:'大きい数は '+hi}],
        why:function(c){return c+' を百の位までのがい数にすると '+r100(c)+' になるから、'+T+' にはならないよ。'},
@@ -495,6 +496,31 @@ function numLine(o){
   return '<div class="nlbox"><svg class="nl" viewBox="0 0 600 86" role="img" aria-label="数直線">'+h+'</svg><p class="nlleg">● … その数をふくむ ○ … その数をふくまない</p></div>';
 }
 
+// レベル6:手順1の数を数直線に表す(T-100〜T+100)。答えた数には○×をつける
+function haniLine(){
+  var q=st.q, S=q.steps[0], T=q.T, X0=30, X1=570, K=(X1-X0)/200, h='';
+  var px=function(n){return X0+(n-(T-100))*K};
+  h+='<line x1="'+X0+'" y1="104" x2="'+X1+'" y2="104" style="stroke:var(--ink);stroke-width:2"/>';
+  for(var v=T-100;v<=T+100;v+=10){
+    var big=(v-T)%100===0, mid=(v-T)%50===0, L=big?12:mid?9:5;
+    h+='<line x1="'+px(v)+'" y1="'+(104-L)+'" x2="'+px(v)+'" y2="'+(104+L)+'" style="stroke:var(--ink);stroke-width:'+(big?2:1)+'"/>';
+    if(big) h+='<text x="'+px(v)+'" y="138" text-anchor="middle" style="fill:var(--sub);font-size:20px;font-weight:700">'+v+'</text>';
+  }
+  // 数のラベルは重ならないように左右にずらし、線で点とむすぶ
+  var it=S.items, n=it.length, lx=it.map(function(o){return Math.min(Math.max(px(o.n),58),542)}), G=112;
+  for(var i=1;i<n;i++) lx[i]=Math.max(lx[i],lx[i-1]+G);
+  if(lx[n-1]>542) lx[n-1]=542;
+  for(i=n-2;i>=0;i--) lx[i]=Math.min(lx[i],lx[i+1]-G);
+  it.forEach(function(o,j){
+    var d=st.xd[j], c=d?(o.ok?'var(--ok)':'var(--ng)'):'var(--sub)', x=px(o.n);
+    h+='<line x1="'+lx[j]+'" y1="66" x2="'+x+'" y2="98" style="stroke:'+c+';stroke-width:1.5"/>';
+    h+='<circle cx="'+x+'" cy="104" r="6" style="fill:'+c+'"/>';
+    h+='<text x="'+lx[j]+'" y="28" text-anchor="middle" style="fill:var(--ink);font-size:24px;font-weight:700">'+o.n+'</text>';
+    h+='<text x="'+lx[j]+'" y="60" text-anchor="middle" style="fill:'+c+';font-size:'+(d?(o.ok?36:28):22)+'px;font-weight:700">'+(d?(o.ok?'○':'×'):'?')+'</text>';
+  });
+  return '<div class="nlbox"><svg class="nl" viewBox="0 0 600 148" role="img" aria-label="数直線">'+h+'</svg>'+
+    '<p class="nlleg">○ … '+T+' になる × … '+T+' にならない</p></div>';
+}
 // 数字の上に「ま」(百の位)「で」(十の位)をつける
 function mdNum(n){
   var s=String(n), L=s.length, h='';
@@ -502,7 +528,10 @@ function mdNum(n){
   return h;
 }
 function renderX(){
-  var q=st.q;
+  var q=st.q, Sc=q.steps[st.xs];
+  // タイムアタックでは、数直線を左の問題の欄に出す(横画面でスクロールしないように)
+  var TAL=st.mode==='ta';
+  $('qline').innerHTML=TAL&&Sc&&Sc.line?haniLine():'';
   [0,1,2].forEach(function(i){
     var S=q.steps[i], el=$('x'+(i+1));
     el.classList.toggle('hidden',!S); if(!S) return;
@@ -512,7 +541,7 @@ function renderX(){
     var b=$('xb'+(i+1)); if(st.xs!==i){b.innerHTML='';return}
     var h='';
     if(S.type==='ox'){
-      h+='<p class="ask">'+S.ask+'</p><div class="oxlist">';
+      h+='<p class="ask">'+S.ask+'</p>'+(S.line&&!TAL?haniLine():'')+'<div class="oxlist">';
       S.items.forEach(function(it,j){
         h+='<div class="oxrow" data-row="'+j+'"><span class="oxn">'+(S.md?mdNum(it.n):it.n)+'</span>'+(st.xd[j]
           ? '<span class="oxmark '+(it.ok?'o':'x')+'">'+(it.ok?'○':'×')+'</span><span class="oxwhy">'+it.note+'</span>'
@@ -520,6 +549,7 @@ function renderX(){
       });
       h+='</div>';
     }else{
+      if(S.line&&!TAL) h+='<p class="prev" style="margin:0">手順1の結果をヒントにしよう</p>'+haniLine();
       if(S.top) h+=S.top();
       if(S.sent) h+='<p class="sent">'+S.sent(st.xp)+'</p>';
       else for(var p=0;p<st.xa;p++) h+='<p class="prev">✓ '+S.asks[p].done+'</p>';
@@ -644,7 +674,7 @@ function endTA(timeup){
 
 function newQ(){
   var ta=st.mode==='ta', X=st.level>=5;
-  $('stdSteps').classList.toggle('hidden',X); $('xsteps').classList.toggle('hidden',!X); $('xend').innerHTML='';
+  $('stdSteps').classList.toggle('hidden',X); $('xsteps').classList.toggle('hidden',!X); $('xend').innerHTML=''; $('qline').innerHTML='';
   if(X){ // レベル5・6
     st.q=(st.level===5?makeIjo:makeHani)(ta?99:st.idx); st.missed=false; st.step=99; st.xs=0; st.xa=0; st.xd=[]; st.xp=[];
     progUI(); $('nextBtn').classList.add('hidden');
