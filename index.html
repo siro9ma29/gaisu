@@ -344,7 +344,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
-var VERSION='v3.1';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var VERSION='v3.2';   // バージョン番号(ここを書きかえると、バッジも変わる)
 var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
 var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス',5:'以上・以下・未満',6:'がい数のはんい'};
@@ -393,12 +393,11 @@ function makeHani(idx){
   var lo=T-50, hi=T+49, items, oks;
   var LT=idx===0?true:idx===1?false:rnd(0,1)===0; // true=以上・未満、false=以上・以下
   var up=LT?hi+1:hi, W=LT?'未満':'以下';
-  do{ // さかいめの数を必ず入れて、○も×も出るようにする
-    var pool=[lo-1,lo,hi,hi+1,T-rnd(1,45),T+rnd(1,45),T-rnd(51,95),T+rnd(51,95)];
-    items=[rnd(0,1)?lo-1:lo, rnd(0,1)?hi:hi+1];
-    while(items.length<4){var v=pool[rnd(0,pool.length-1)]; if(items.indexOf(v)<0) items.push(v)}
-    oks=items.filter(function(x){return r100(x)===T}).length;
-  }while(oks===0||oks===4);
+  // 出す数は T の前後50(例:300なら 250〜350)のはんいだけ。×になるのは T+50 だけなので、必ず入れる
+  items=[hi+1];
+  var pool=[lo,lo+1,hi,hi-1,T,T-rnd(2,45),T+rnd(1,45),T-rnd(2,45),T+rnd(1,45)];
+  while(items.length<4){var v=pool[rnd(0,pool.length-1)]; if(items.indexOf(v)<0) items.push(v)}
+  oks=3;
   sortN(items);
   var why=function(n){var d=Math.floor(n/10)%10;return n+' の十の位は '+d+'。'+(d>=5?'切り上げ':'切り捨て')+'て、'+r100(n)+' になるよ。'};
   return {x:6,T:T,
