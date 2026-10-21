@@ -344,7 +344,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
-var VERSION='v3.2';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var VERSION='v3.3';   // バージョン番号(ここを書きかえると、バッジも変わる)
 var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
 var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス',5:'以上・以下・未満',6:'がい数のはんい'};
@@ -497,13 +497,14 @@ function numLine(o){
 
 // レベル6:手順1の数を数直線に表す(T-100〜T+100)。答えた数には○×をつける
 function haniLine(){
-  var q=st.q, S=q.steps[0], T=q.T, X0=30, X1=570, K=(X1-X0)/200, h='';
-  var px=function(n){return X0+(n-(T-100))*K};
-  h+='<line x1="'+X0+'" y1="104" x2="'+X1+'" y2="104" style="stroke:var(--ink);stroke-width:2"/>';
-  for(var v=T-100;v<=T+100;v+=10){
-    var big=(v-T)%100===0, mid=(v-T)%50===0, L=big?12:mid?9:5;
-    h+='<line x1="'+px(v)+'" y1="'+(104-L)+'" x2="'+px(v)+'" y2="'+(104+L)+'" style="stroke:var(--ink);stroke-width:'+(big?2:1)+'"/>';
-    if(big) h+='<text x="'+px(v)+'" y="138" text-anchor="middle" style="fill:var(--sub);font-size:20px;font-weight:700">'+v+'</text>';
+  // 数直線は T の前後50(例:300なら 250〜350)。目もりは10ごと、T と前後50に数を書く
+  var q=st.q, S=q.steps[0], T=q.T, X0=40, X1=560, K=(X1-X0)/100, h='';
+  var px=function(n){return X0+(n-(T-50))*K};
+  h+='<line x1="'+(X0-12)+'" y1="104" x2="'+(X1+12)+'" y2="104" style="stroke:var(--ink);stroke-width:2"/>';
+  for(var v=T-50;v<=T+50;v+=10){
+    var big=v===T, mid=(v-T)%50===0, L=big?12:mid?10:6;
+    h+='<line x1="'+px(v)+'" y1="'+(104-L)+'" x2="'+px(v)+'" y2="'+(104+L)+'" style="stroke:var(--ink);stroke-width:'+(big||mid?2:1)+'"/>';
+    if(big||mid) h+='<text x="'+px(v)+'" y="138" text-anchor="middle" style="fill:var(--sub);font-size:20px;font-weight:700">'+v+'</text>';
   }
   // 数のラベルは重ならないように左右にずらし、線で点とむすぶ
   var it=S.items, n=it.length, lx=it.map(function(o){return Math.min(Math.max(px(o.n),58),542)}), G=112;
