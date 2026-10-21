@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>がい数れんしゅう v3.5</title>
+<title>がい数れんしゅう v3.6</title>
 <style>
 :root{
   --bg:#f6f1e7; --card:#fffdf8; --ink:#2b2a33; --sub:#6b6875; --line:#e2d9c8;
@@ -129,6 +129,25 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .oxn .cir{font-weight:700;border-radius:50%;box-shadow:0 0 0 3px var(--ng);padding:0 .12em}
 .ox.rdb{width:auto;min-width:68px;height:50px;font-size:22px;font-variant-numeric:tabular-nums}
 .rdline{display:flex;justify-content:space-between;gap:8px;margin:2px 0 6px}
+/* レベル6:数直線の上の数(タップして「ま」「で」・○・00) */
+.nlwrap{position:relative;height:calc(24px + clamp(34px,9vw,42px) + clamp(30px,8vw,36px))}
+.endlab{position:absolute;top:0;transform:translateX(-50%);display:flex;gap:1px}
+.endlab.plain .et b,.endlab.plain .et .sl{width:auto;padding:0 1px}
+.endlab.plain .et b{font-size:clamp(18px,5vw,24px);color:var(--sub)} /* まん中の数は小さく(はしの数を目立たせる) */
+.endlab.d4 .et b,.endlab.d4 .et .sl{width:clamp(20px,5.4vw,30px)}
+.et{display:flex;flex-direction:column;align-items:center;background:none;border:0;padding:0;color:var(--ink);opacity:1}
+.et:disabled{color:var(--ink);opacity:1}
+.et .mk{font-style:normal;height:24px;line-height:24px;font-size:20px;font-weight:700;color:var(--ng)}
+.et b{width:clamp(24px,6.2vw,34px);height:clamp(34px,9vw,42px);display:grid;place-items:center;font-size:clamp(22px,6.2vw,30px);
+  border:2px solid transparent;border-radius:8px;font-variant-numeric:tabular-nums}
+.endlab.pick .et b{border-color:var(--main);background:#fff;box-shadow:0 3px 0 var(--main-soft)}
+.et.cir b{border:3px solid var(--ng);border-radius:50%;background:#fff}
+.et .sl{font-style:normal;height:clamp(30px,8vw,36px);line-height:clamp(30px,8vw,36px);width:clamp(24px,6.2vw,34px);font-size:clamp(22px,6.2vw,30px);
+  font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
+.et .sl.z{color:var(--main)}
+.et .sl.pop{animation:pop .35s}
+.et .sl.fr{border:3px solid var(--ng);border-radius:8px;background:#fff;box-sizing:border-box}
+.et.shake b{animation:shake .3s;border-color:var(--ng);background:var(--ng-soft)}
 .rdline div{display:flex;gap:6px}
 .ox.rdb.wrong{border-color:var(--ng);background:var(--ng-soft);color:var(--ng);box-shadow:none;animation:shake .3s}
 .oxwhy{flex:none;color:var(--sub);font-size:15px;min-width:5.5em;text-align:right}
@@ -349,7 +368,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
-var VERSION='v3.5';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var VERSION='v3.6';   // バージョン番号(ここを書きかえると、バッジも変わる)
 var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
 var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス',5:'以上・以下・未満',6:'がい数のはんい'};
@@ -395,21 +414,19 @@ function sortN(a){return a.sort(function(x,y){return x-y})}
 // 手順1:はしの数(T-50 と T+50)を百の位までのがい数にする → 手順2:( □ 以上 □ 未満/以下 ) に数を入れる
 // 表し方は「以上・未満」と「以上・以下」の2しゅるい(1問目=未満、2問目=以下、そのあとはランダム)
 function makeHani(idx){
-  var T=(idx===0)?800:(idx<6||st.mode==='ta'&&rnd(0,1))?rnd(2,9)*100:(function(){var t;do{t=rnd(11,99)*100}while(t%1000===0);return t})();
+  // はしの数の百の位が9になる T(900・1900 など)は出さない(2たくが 9と10 になってしまうため)
+  var T=(idx===0)?800:(idx<6||st.mode==='ta'&&rnd(0,1))?rnd(2,8)*100:(function(){var t;do{t=rnd(11,99)*100}while(t%1000===0||t%1000===900);return t})();
   var lo=T-50, hi=T+49, A=T+50;
   var LT=idx===0?true:idx===1?false:rnd(0,1)===0; // true=以上・未満、false=以上・以下
   var up=LT?A:hi, W=LT?'未満':'以下';
   var blank=function(a){return '( <span class="bl">'+(a&&a[0]!==undefined?a[0]:'&nbsp;')+'</span>以上 <span class="bl">'+(a&&a[1]!==undefined?a[1]:'&nbsp;')+'</span>'+W+' )'};
-  var rwhy=function(n){return n+' の十の位は 5。5は切り上げだから、'+r100(n)+' になるよ。'};
   return {x:6,T:T,lo:lo,A:A,blank:blank,
     text:'四捨五入して、<em>百の位までのがい数</em>にすると、'+T+' になる整数のはんいを、以上、'+W+'を使って表しましょう。',
     show:'<p class="sent" style="margin:0">'+blank()+'</p>',
     steps:[
-      {title:lo+' と '+A+' は、いくつになる?',type:'rd',line:true,
-       ask:'数直線のはしの数 <b>'+lo+'</b> と <b>'+A+'</b> を、百の位までのがい数にすると、いくつになるかな?',
-       items:[{n:lo,ch:[T-100,T],ans:T},{n:A,ch:[T,T+100],ans:T+100}].map(function(o){
-         o.ok=o.ans===T; o.note=o.ok?T+' になる(入る)':T+' にならない'; return o}),
-       why:rwhy, md:st.mode!=='ta'&&idx<6, // 基本モードの1〜6問目は「ま」「で」と○をヒントに表示。7問目からはなし
+      // 手順1:レベル1と同じように、数直線のはしの数に ①「ま」「で」 ②四捨五入する数に○(同時に00) ③百の位の数を2たく
+      {title:lo+' と '+A+' を、がい数にしよう',type:'end',line:true,
+       items:[lo,A].map(function(n){var pd=Math.floor(n/100)%10;return {n:n,pd:pd,ad:pd+1,ans:r100(n),ok:r100(n)===T}}),
        res:function(){return lo+'→'+T+'、'+A+'→'+(T+100)}},
       {title:'「以上」「'+W+'」で表す',type:'pick',line:true,
        sent:function(a){return T+' になる整数のはんいは、<br>'+blank(a)},
@@ -498,40 +515,42 @@ function numLine(o){
 }
 
 // レベル6:教科書と同じ数直線(T-50〜T+60、目もり10ごと)。はんいを帯で表す
-// 手順1では、数直線のはしの数(T-50・T+50)に「ま」「で」と十の位の○をつけ、その下にがい数をえらぶボタンを出す
+// 数直線の上の数(はしの数)をそのままタップして、「ま」「で」→○と00→百の位の数、の順にがい数にする
+function endState(j){ // はしの数 j の進み具合 -1=まだ 0=「ま」まち 1=「で」まち 2=○まち 3=2たくまち 9=できた
+  if(st.xd[j]||st.xs>0) return 9;
+  return st.ej===j?st.es:-1;
+}
 function haniLine(){
-  var q=st.q, S=q.steps[0], T=q.T, on=st.xs===0, md=on&&S.md, top=md?30:8,
-      X0=64, X1=548, K=(X1-X0)/110, h='', Y=84+top, FS=44;
+  var q=st.q, S=q.steps[0], T=q.T, X0=110, X1=548, K=(X1-X0)/110, h='', Y=34;
   var px=function(n){return X0+(n-(T-50))*K};
-  // 数を1けたずつ書く(はしの数には「ま」「で」と○をつける)
-  var num=function(v,x,mark){
-    var s=String(v), L=s.length, w=FS*(mark?0.82:0.6), x0=x-(L-1)*w/2, y=42+top, r='';
+  var lab=function(v,j){
+    var s=String(v), L=s.length, es=j===undefined?-1:endState(j), pick=es>=0&&es<=2, it=j===undefined?null:S.items[j], r='';
     for(var i=0;i<L;i++){
-      var e=L-1-i, xi=x0+i*w;
-      if(mark&&e===1) r+='<circle cx="'+xi+'" cy="'+(y-FS*0.36)+'" r="'+(FS*0.5)+'" style="fill:none;stroke:var(--ng);stroke-width:4"/>';
-      if(mark&&(e===2||e===1)) r+='<text x="'+xi+'" y="'+(y-FS*0.95)+'" text-anchor="middle" style="fill:var(--ng);font-size:26px;font-weight:700">'+(e===2?'ま':'で')+'</text>';
-      r+='<text x="'+xi+'" y="'+y+'" text-anchor="middle" style="fill:var(--ink);font-size:'+FS+'px;font-weight:700">'+s[i]+'</text>';
+      var e=L-1-i, mk=(e===2&&es>=1)?'ま':(e===1&&es>=2)?'で':'', sl='', sc='';
+      if(es>=3&&e<=1){sl='0';sc=' z'+(es===3?' pop':'')}  // 00 は ○ をつけたと同時に出す
+      else if(es===3&&e===2){sc=' fr pop'}          // どの位の数をえらぶのか、赤わくでしめす
+      else if(es===9&&e===2){sl=it.ad}
+      else if(es===9&&e>2){sl=s[i]}
+      r+='<button class="et'+(es>=3&&e===1?' cir':'')+'" data-j="'+j+'" data-e="'+e+'"'+(pick?'':' disabled')+'>'+
+        '<i class="mk">'+mk+'</i><b>'+s[i]+'</b><i class="sl'+sc+'">'+sl+'</i></button>';
     }
-    return r;
+    return '<div class="endlab'+(pick?' pick':'')+(j===undefined?' plain':'')+(L>3?' d4':'')+'" style="left:'+(px(v)/6)+'%">'+r+'</div>';
   };
-  h+='<line x1="'+(X0-30)+'" y1="'+Y+'" x2="'+(X1+30)+'" y2="'+Y+'" style="stroke:var(--main);stroke-width:4"/>';
+  var top='<div class="nlwrap">'+lab(T-50,0)+lab(T)+lab(T+50,1)+'</div>';
+  h+='<line x1="'+(X0-44)+'" y1="'+Y+'" x2="'+(X1+34)+'" y2="'+Y+'" style="stroke:var(--main);stroke-width:4"/>';
   for(var v=T-50;v<=T+60;v+=10){
-    var lab=(v-T)%50===0, L=lab?30:18;
+    var L=(v-T)%50===0?26:14;
     h+='<line x1="'+px(v)+'" y1="'+(Y-L)+'" x2="'+px(v)+'" y2="'+Y+'" style="stroke:var(--main);stroke-width:2"/>';
-    if(lab) h+=num(v,px(v),md&&v!==T);
   }
   // はんいの帯:左はしはまっすぐ(ふくむ)、右はしはななめ(ふくまない)
   var xa=px(T-50), xb=px(T+50);
   h+='<polygon points="'+xa+','+(Y+2)+' '+xb+','+(Y+2)+' '+(xb-16)+','+(Y+26)+' '+xa+','+(Y+26)+'" style="fill:var(--main-soft);stroke:var(--main);stroke-width:2"/>';
-  // 手順1の答え(はしの数の真下)
+  // 手順1の答え(はしの数の真下に ○ か ×)
   S.items.forEach(function(o,j){
-    var d=st.xd[j], c=d?(o.ok?'var(--ok)':'var(--ng)'):'var(--sub)', x=px(o.n);
-    h+='<text x="'+x+'" y="'+(Y+66)+'" text-anchor="middle" style="fill:'+c+';font-size:30px;font-weight:700">'+(d?'→ '+o.ans+(o.ok?' ○':' ×'):'→ ?')+'</text>';
+    var d=endState(j)===9, c=d?(o.ok?'var(--ok)':'var(--ng)'):'var(--sub)';
+    h+='<text x="'+px(o.n)+'" y="'+(Y+66)+'" text-anchor="middle" style="fill:'+c+';font-size:30px;font-weight:700">'+(d?(o.ok?'○':'×'):'?')+'</text>';
   });
-  var btn='';
-  if(on) btn='<div class="rdline">'+S.items.map(function(o,j){
-    return '<div>'+(st.xd[j]?'':o.ch.map(function(c,k){return '<button class="ox rdb" data-j="'+j+'" data-k="'+k+'">'+c+'</button>'}).join(''))+'</div>'}).join('')+'</div>';
-  return '<div class="nlbox"><svg class="nl" viewBox="0 0 600 '+(158+top)+'" role="img" aria-label="数直線">'+h+'</svg>'+btn+
+  return '<div class="nlbox">'+top+'<svg class="nl" viewBox="0 0 600 '+(Y+80)+'" role="img" aria-label="数直線">'+h+'</svg>'+
     '<p class="nlleg">○ … '+T+' になる × … '+T+' にならない</p></div>';
 }
 // 数字の上に「ま」(百の位)「で」(十の位)をつける
@@ -562,8 +581,15 @@ function renderX(){
           : '<button class="ox" data-j="'+j+'" data-v="1">○</button><button class="ox" data-j="'+j+'" data-v="0">×</button>')+'</div>';
       });
       h+='</div>';
-    }else if(S.type==='rd'){ // 数直線のはしの数を、がい数にする(ボタンは数直線の下)
-      h+='<p class="ask">'+S.ask+'</p>'+(TAL?'<p class="prev" style="margin:0">← 数直線の下のボタンでえらぼう</p>':haniLine());
+    }else if(S.type==='end'){ // 数直線のはしの数を、レベル1と同じ手順でがい数にする
+      var J=st.ej, it=S.items[J], side=J===0?'左':'右';
+      if(J===1) h+='<p class="prev">✓ '+S.items[0].n+' → '+S.items[0].ans+'</p>';
+      h+='<p class="ask">'+(st.es===0?side+'のはしの数 <b>'+it.n+'</b> を、百の位までのがい数にするよ。'+(TAL?'':'数直線の上の数字の')+'「<b>ま</b>」をつける数字をタップしよう。'
+        :st.es===1?'つぎに、「<b>で</b>」をつける数字をタップしよう。'
+        :st.es===2?'<b>四捨五入する位の数字</b>をタップしよう。'
+        :'十の位は <b>5</b>。<b>百の位</b>の数字は、どちらになるかな?')+'</p>';
+      if(!TAL) h+=haniLine();
+      if(st.es===3) h+='<div class="btns">'+[it.pd,it.ad].map(function(d){return '<button class="btn two" data-d="'+d+'">'+d+'</button>'}).join('')+'</div>';
     }else{
       if(S.line&&!TAL) h+='<p class="prev" style="margin:0">手順1の結果をヒントにしよう</p>'+haniLine();
       if(S.top) h+=S.top();
@@ -692,7 +718,7 @@ function newQ(){
   var ta=st.mode==='ta', X=st.level>=5;
   $('stdSteps').classList.toggle('hidden',X); $('xsteps').classList.toggle('hidden',!X); $('xend').innerHTML=''; $('qline').innerHTML='';
   if(X){ // レベル5・6
-    st.q=(st.level===5?makeIjo:makeHani)(ta?99:st.idx); st.missed=false; st.step=99; st.xs=0; st.xa=0; st.xd=[]; st.xp=[];
+    st.q=(st.level===5?makeIjo:makeHani)(ta?99:st.idx); st.missed=false; st.step=99; st.xs=0; st.xa=0; st.xd=[]; st.xp=[]; st.ej=0; st.es=0;
     progUI(); $('nextBtn').classList.add('hidden');
     $('qtext').innerHTML=st.q.text; var t=$('tiles'); t.classList.remove('pick'); t.innerHTML='<div>'+st.q.show+'</div>';
     renderX(); return;
@@ -872,13 +898,23 @@ function xclick(ev){
       var row=b.closest('.oxrow'); row.classList.remove('shake'); void row.offsetWidth; row.classList.add('shake');
       hint(S.why(it.n));
     }
-  }else if(S.type==='rd'&&b.dataset.k!==undefined){
-    var j2=+b.dataset.j, it2=S.items[j2];
-    if(it2.ch[+b.dataset.k]===it2.ans){
-      st.xd[j2]=true; $('hint')&&($('hint').innerHTML='');
-      if(S.items.every(function(_,i){return st.xd[i]})) nextX(); else renderX();
-    }else{
-      b.classList.add('wrong'); hint(S.why(it2.n));
+  }else if(S.type==='end'){
+    var J=st.ej, it=S.items[J];
+    if(b.classList.contains('et')){ // ①「ま」→「で」 ②四捨五入する数(十の位)
+      if(+b.dataset.j!==J||st.es>2) return;
+      if(+b.dataset.e===[2,1,1][st.es]){
+        st.es++; if(st.es===2&&st.mode==='ta') st.es=3; // タイムアタックは「で」をつけたら、○と00を自動で出す
+        renderX();
+      }else{
+        b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+        hint(['「百の位まで」だから、<b>百の位</b>の数字に「ま」をつけるよ。','「で」は、「ま」の<b>1つ右</b>の数字につけるよ。',
+              '百の位までのがい数にするときは、その<b>1つ下の位(十の位)</b>を四捨五入するよ。'][st.es]);
+      }
+    }else if(b.dataset.d!==undefined&&st.es===3){ // ③百の位の数をえらぶ
+      if(+b.dataset.d===it.ad){
+        st.xd[J]=true;
+        if(J===0){ st.ej=1; st.es=0; renderX(); } else nextX();
+      }else{ b.classList.add('wrong'); hint('十の位は 5。5は切り上げだから、百の位の '+it.pd+' に1をたすよ。'); }
     }
   }else if(S.type==='pick'&&b.dataset.c!==undefined){
     var A=S.asks[st.xa], c=A.ch[+b.dataset.c];
