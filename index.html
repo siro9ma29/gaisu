@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>がい数れんしゅう v3.4</title>
+<title>がい数れんしゅう v3.5</title>
 <style>
 :root{
   --bg:#f6f1e7; --card:#fffdf8; --ink:#2b2a33; --sub:#6b6875; --line:#e2d9c8;
@@ -127,7 +127,10 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .oxn .dg{display:inline-flex;flex-direction:column;align-items:center;line-height:1;vertical-align:bottom}
 .oxn .dg i{font-style:normal;font-size:.5em;height:1.1em;color:var(--ng)}
 .oxn .cir{font-weight:700;border-radius:50%;box-shadow:0 0 0 3px var(--ng);padding:0 .12em}
-.ox.rdb{width:auto;min-width:84px;font-size:24px;font-variant-numeric:tabular-nums}
+.ox.rdb{width:auto;min-width:68px;height:50px;font-size:22px;font-variant-numeric:tabular-nums}
+.rdline{display:flex;justify-content:space-between;gap:8px;margin:2px 0 6px}
+.rdline div{display:flex;gap:6px}
+.ox.rdb.wrong{border-color:var(--ng);background:var(--ng-soft);color:var(--ng);box-shadow:none;animation:shake .3s}
 .oxwhy{flex:none;color:var(--sub);font-size:15px;min-width:5.5em;text-align:right}
 .btns.three{grid-template-columns:repeat(3,1fr)}
 /* はんいの手順3:手順2の答え(いちばん小さい数・大きい数)を大きく見せる */
@@ -346,7 +349,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 <script>
 (function(){
 "use strict";
-var VERSION='v3.4';   // バージョン番号(ここを書きかえると、バッジも変わる)
+var VERSION='v3.5';   // バージョン番号(ここを書きかえると、バッジも変わる)
 var LIMIT=60;         // タイムアタックの秒数
 var PLACE=['一','十','百','千','一万','十万','百万'];
 var LNAME={1:'千の位までのがい数',2:'いろいろな位までのがい数',3:'上から○けたのがい数',4:'ミックス',5:'以上・以下・未満',6:'がい数のはんい'};
@@ -494,25 +497,41 @@ function numLine(o){
   return '<div class="nlbox"><svg class="nl" viewBox="0 0 600 86" role="img" aria-label="数直線">'+h+'</svg><p class="nlleg">● … その数をふくむ ○ … その数をふくまない</p></div>';
 }
 
-// レベル6:教科書と同じ数直線(T-50〜T+60、目もり10ごと)。はんいを帯で表し、手順1の答えを下に書く
+// レベル6:教科書と同じ数直線(T-50〜T+60、目もり10ごと)。はんいを帯で表す
+// 手順1では、数直線のはしの数(T-50・T+50)に「ま」「で」と十の位の○をつけ、その下にがい数をえらぶボタンを出す
 function haniLine(){
-  var q=st.q, S=q.steps[0], T=q.T, X0=64, X1=548, K=(X1-X0)/110, h='', Y=76;
+  var q=st.q, S=q.steps[0], T=q.T, on=st.xs===0, md=on&&S.md, top=md?30:8,
+      X0=64, X1=548, K=(X1-X0)/110, h='', Y=84+top, FS=44;
   var px=function(n){return X0+(n-(T-50))*K};
+  // 数を1けたずつ書く(はしの数には「ま」「で」と○をつける)
+  var num=function(v,x,mark){
+    var s=String(v), L=s.length, w=FS*(mark?0.82:0.6), x0=x-(L-1)*w/2, y=42+top, r='';
+    for(var i=0;i<L;i++){
+      var e=L-1-i, xi=x0+i*w;
+      if(mark&&e===1) r+='<circle cx="'+xi+'" cy="'+(y-FS*0.36)+'" r="'+(FS*0.5)+'" style="fill:none;stroke:var(--ng);stroke-width:4"/>';
+      if(mark&&(e===2||e===1)) r+='<text x="'+xi+'" y="'+(y-FS*0.95)+'" text-anchor="middle" style="fill:var(--ng);font-size:26px;font-weight:700">'+(e===2?'ま':'で')+'</text>';
+      r+='<text x="'+xi+'" y="'+y+'" text-anchor="middle" style="fill:var(--ink);font-size:'+FS+'px;font-weight:700">'+s[i]+'</text>';
+    }
+    return r;
+  };
   h+='<line x1="'+(X0-30)+'" y1="'+Y+'" x2="'+(X1+30)+'" y2="'+Y+'" style="stroke:var(--main);stroke-width:4"/>';
   for(var v=T-50;v<=T+60;v+=10){
     var lab=(v-T)%50===0, L=lab?30:18;
     h+='<line x1="'+px(v)+'" y1="'+(Y-L)+'" x2="'+px(v)+'" y2="'+Y+'" style="stroke:var(--main);stroke-width:2"/>';
-    if(lab) h+='<text x="'+px(v)+'" y="34" text-anchor="middle" style="fill:var(--ink);font-size:34px;font-weight:700">'+v+'</text>';
+    if(lab) h+=num(v,px(v),md&&v!==T);
   }
   // はんいの帯:左はしはまっすぐ(ふくむ)、右はしはななめ(ふくまない)
   var xa=px(T-50), xb=px(T+50);
   h+='<polygon points="'+xa+','+(Y+2)+' '+xb+','+(Y+2)+' '+(xb-16)+','+(Y+26)+' '+xa+','+(Y+26)+'" style="fill:var(--main-soft);stroke:var(--main);stroke-width:2"/>';
-  // 手順1の答え
+  // 手順1の答え(はしの数の真下)
   S.items.forEach(function(o,j){
     var d=st.xd[j], c=d?(o.ok?'var(--ok)':'var(--ng)'):'var(--sub)', x=px(o.n);
     h+='<text x="'+x+'" y="'+(Y+66)+'" text-anchor="middle" style="fill:'+c+';font-size:30px;font-weight:700">'+(d?'→ '+o.ans+(o.ok?' ○':' ×'):'→ ?')+'</text>';
   });
-  return '<div class="nlbox"><svg class="nl" viewBox="0 0 600 150" role="img" aria-label="数直線">'+h+'</svg>'+
+  var btn='';
+  if(on) btn='<div class="rdline">'+S.items.map(function(o,j){
+    return '<div>'+(st.xd[j]?'':o.ch.map(function(c,k){return '<button class="ox rdb" data-j="'+j+'" data-k="'+k+'">'+c+'</button>'}).join(''))+'</div>'}).join('')+'</div>';
+  return '<div class="nlbox"><svg class="nl" viewBox="0 0 600 '+(158+top)+'" role="img" aria-label="数直線">'+h+'</svg>'+btn+
     '<p class="nlleg">○ … '+T+' になる × … '+T+' にならない</p></div>';
 }
 // 数字の上に「ま」(百の位)「で」(十の位)をつける
@@ -543,14 +562,8 @@ function renderX(){
           : '<button class="ox" data-j="'+j+'" data-v="1">○</button><button class="ox" data-j="'+j+'" data-v="0">×</button>')+'</div>';
       });
       h+='</div>';
-    }else if(S.type==='rd'){ // 数ごとに、がい数を2たくでえらぶ
-      h+='<p class="ask">'+S.ask+'</p>'+(S.line&&!TAL?haniLine():'')+'<div class="oxlist">';
-      S.items.forEach(function(it,j){
-        h+='<div class="oxrow" data-row="'+j+'"><span class="oxn">'+(S.md?mdNum(it.n,true):it.n)+'</span>'+(st.xd[j]
-          ? '<span class="oxmark '+(it.ok?'o':'x')+'">'+it.ans+'</span><span class="oxwhy">'+it.note+'</span>'
-          : it.ch.map(function(c,k){return '<button class="ox rdb" data-j="'+j+'" data-k="'+k+'">'+c+'</button>'}).join(''))+'</div>';
-      });
-      h+='</div>';
+    }else if(S.type==='rd'){ // 数直線のはしの数を、がい数にする(ボタンは数直線の下)
+      h+='<p class="ask">'+S.ask+'</p>'+(TAL?'<p class="prev" style="margin:0">← 数直線の下のボタンでえらぼう</p>':haniLine());
     }else{
       if(S.line&&!TAL) h+='<p class="prev" style="margin:0">手順1の結果をヒントにしよう</p>'+haniLine();
       if(S.top) h+=S.top();
@@ -846,10 +859,10 @@ $('b4').addEventListener('click',function(ev){
 });
 
 // レベル5・6の操作
-$('xsteps').addEventListener('click',function(ev){
+function xclick(ev){
   if(st.level<5||(st.mode==='ta'&&!st.run)) return;
   var q=st.q, S=q.steps[st.xs]; if(!S) return;
-  var b=ev.target.closest('button'); if(!b||!b.closest('#xb'+(st.xs+1))) return;
+  var b=ev.target.closest('button'); if(!b||!(b.closest('#xb'+(st.xs+1))||b.closest('#qline'))) return;
   if(S.type==='ox'&&b.dataset.j!==undefined){
     var j=+b.dataset.j, it=S.items[j];
     if((b.dataset.v==='1')===it.ok){
@@ -865,8 +878,7 @@ $('xsteps').addEventListener('click',function(ev){
       st.xd[j2]=true; $('hint')&&($('hint').innerHTML='');
       if(S.items.every(function(_,i){return st.xd[i]})) nextX(); else renderX();
     }else{
-      var row2=b.closest('.oxrow'); row2.classList.remove('shake'); void row2.offsetWidth; row2.classList.add('shake');
-      hint(S.why(it2.n));
+      b.classList.add('wrong'); hint(S.why(it2.n));
     }
   }else if(S.type==='pick'&&b.dataset.c!==undefined){
     var A=S.asks[st.xa], c=A.ch[+b.dataset.c];
@@ -875,7 +887,9 @@ $('xsteps').addEventListener('click',function(ev){
       if(st.xa>=S.asks.length){ nextX(); } else renderX();
     }else{ b.classList.add('wrong'); hint(A.why||S.why(c)); }
   }
-});
+}
+$('xsteps').addEventListener('click',xclick);
+$('qline').addEventListener('click',xclick); // タイムアタックでは、数直線の下のボタンが左の欄にある
 
 $('nextBtn').addEventListener('click',function(){
   st.idx++;
